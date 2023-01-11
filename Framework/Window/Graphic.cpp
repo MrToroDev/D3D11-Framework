@@ -118,6 +118,7 @@ Graphic::Graphic(Window** win, bool fullscreen)
     D3D11_RASTERIZER_DESC rsDesc = {};
     rsDesc.FillMode = D3D11_FILL_MODE::D3D11_FILL_SOLID;
     rsDesc.CullMode = D3D11_CULL_MODE::D3D11_CULL_NONE;
+    rsDesc.FrontCounterClockwise = false;
     rsDesc.DepthBias = false;
     rsDesc.DepthBiasClamp = 0;
     rsDesc.SlopeScaledDepthBias = 0;
@@ -143,19 +144,18 @@ Graphic::Graphic(Window** win, bool fullscreen)
 
 Graphic::~Graphic()
 {
-    devcon->Flush();
-    backbuffer.Reset();
-    swapchain.Reset();
-    depthStencilBuffer.Reset();
-    depthStencilState.Reset();
-    depthStencilView.Reset();
-    rasterizerState.Reset();
-    _dxgifactory.Reset();
-    endQuery.Reset();
-    startQuery.Reset();
-    disjoinQuery.Reset();
-    devcon.Reset();
-    dev.Reset();
+    if (backbuffer) backbuffer.Reset();
+    if (swapchain) swapchain.Reset();
+    if (depthStencilBuffer) depthStencilBuffer.Reset();
+    if (depthStencilState) depthStencilState.Reset();
+    if (depthStencilView) depthStencilView.Reset();
+    if (rasterizerState) rasterizerState.Reset();
+    if (_dxgifactory) _dxgifactory.Reset();
+    if (endQuery) endQuery.Reset();
+    if (startQuery) startQuery.Reset();
+    if (disjoinQuery) disjoinQuery.Reset();
+    if (devcon) devcon.Reset();
+    if (dev) dev.Reset();
 }
 
 float DX::Graphic::GetGPUTime()
@@ -246,6 +246,12 @@ void Graphic::SetViewport(int width, int height, int x, int y)
     devcon->RSSetScissorRects(1, &scRect); // Set Scissor state
 }
 
+void DX::Graphic::ClearStateFlush()
+{
+    devcon->Flush();
+    devcon->ClearState();
+}
+
 bool DX::Graphic::isFullscreen() const
 {
     int fullscreen;
@@ -266,6 +272,11 @@ ComPtr<ID3D11Device> Graphic::getDevice()
 ComPtr<ID3D11DeviceContext> Graphic::getDeviceContext()
 {
     return devcon;
+}
+
+ComPtr<IDXGIFactory2> DX::Graphic::getFactory()
+{
+    return this->_dxgifactory;
 }
 
 ComPtr<ID3D11RenderTargetView> Graphic::getRenderTarget()

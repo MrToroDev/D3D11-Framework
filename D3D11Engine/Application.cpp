@@ -173,7 +173,7 @@ void Application::HandleDebugMessage()
 void Application::InitWinGraphic(HINSTANCE hinstance)
 {
 	data->window = new DX::Window(
-		"D3D11 - Engine",
+		std::string(APP_NAME).append(" : ").append(APP_VERSION).c_str(),
 		data->GraphicSettings["Window"]["width"],
 		data->GraphicSettings["Window"]["height"], true
 	);
@@ -202,7 +202,7 @@ void Application::InitImgui()
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	io = &ImGui::GetIO(); (void)io;
-	io->DisplaySize = ImVec2(data->window->GetWidth(), data->window->GetHeight());
+	io->DisplaySize = ImVec2((float)data->window->GetWidth(), (float)data->window->GetHeight());
 	io->IniFilename = "Settings/ImGui.ini";
 	io->ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard
 		| ImGuiConfigFlags_DockingEnable
@@ -289,8 +289,8 @@ Application::Application(HINSTANCE hInstance)
 		data->FrameLimit = data->GraphicSettings["Graphic"]["fpsLimit"];
 #if defined(_DEBUG)
 		DX::LogWarning("THIS VERSION OF THE APPLICATION IS IN DEBUG MODE! This mean that the Application could have bugs.");
-		DX::LogDebugMessage(std::string(glfwGetVersionString()));
 #endif
+		data->assetManager.InitResources("Assets/Data.json");
 		srand((unsigned)time(NULL));
 	}
 	catch (DX::com_exception e) {
@@ -310,13 +310,22 @@ Application::~Application()
 	graphicFile << data->GraphicSettings;
 	graphicFile.close();
 
-	delete data->D3Dgraphic;
+	data->D3Dgraphic->ClearStateFlush();
+
+	DX::LogInfo("Destroying Window...");
 	delete data->window;
+	DX::LogInfo("Shutting Down ImGui...");
 	ImGui_ImplDX11_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
 	ImGui::DestroyContext();
+	DX::LogInfo("Destroying State objects...");
 	data->STmachine.GetActiveState()->destroy();
+	DX::LogInfo("Destroying Graphics...");
+	data->D3Dgraphic->ClearStateFlush();
+	delete data->D3Dgraphic;
 #if defined(_DEBUG)
+	debuglayer->ReportLiveDeviceObjects(D3D11_RLDO_FLAGS::D3D11_RLDO_SUMMARY);
+	DX::LogInfo("Destroying debug layer...");
 	debuglayer.Reset();
 	debugInfo.Reset();
 #endif
@@ -341,7 +350,9 @@ void Application::update()
 
 	if (dt >= 1.0f / data->FrameLimit && data->window->IsFocusing()) {
 		data->FPS = 1.0f / dt;
-		data->CPU_TIME = dt * 1000;
+		// Fix the cpu time to 2 decimal precision
+		float value = (int)((dt * 1000) * 100 + .5);
+		data->CPU_TIME = (float)value / 100;
 		lasttime = time;
 		data->STmachine.GetActiveState()->update(dt);
 		data->physicWorld.mScene->simulate(dt);

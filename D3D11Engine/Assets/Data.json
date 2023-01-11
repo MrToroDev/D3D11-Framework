@@ -1,0 +1,12 @@
+{
+  "shaders": {
+	"triangle": "Assets/Shaders/Triangle.hlsl",
+	"cube": "Assets/Shaders/Object3D.hlsl",
+	"renderTarget": "Assets/Shaders/RenderTarget.hlsl"
+  },
+  "textures": {},
+  "fonts": {
+	"consola": "Assets/Fonts/consola_font.sprite"
+  },
+  "sounds": {}
+}

@@ -170,6 +170,7 @@
     <ClCompile Include="Logger.cpp" />
     <ClCompile Include="Physics\RigidDynamic.cpp" />
     <ClCompile Include="Physics\RigidStatic.cpp" />
+    <ClCompile Include="System\AssetManager.cpp" />
     <ClCompile Include="System\Math.cpp" />
     <ClCompile Include="Utils\StateMachine.cpp" />
     <ClCompile Include="Utils\Utils.cpp" />
@@ -196,6 +197,7 @@
     <ClInclude Include="Memory.h" />
     <ClInclude Include="Physics\RigidDynamic.h" />
     <ClInclude Include="Physics\RigidStatic.h" />
+    <ClInclude Include="System\AssetManager.h" />
     <ClInclude Include="System\Config.h" />
     <ClInclude Include="System\Math.h" />
     <ClInclude Include="Utils\StateMachine.h" />

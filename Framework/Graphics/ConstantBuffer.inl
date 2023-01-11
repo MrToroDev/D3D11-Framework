@@ -1,6 +1,13 @@
 #include "../Logger.h"
 #include <sstream>
+#include "../Memory.h"
 #include "ConstantBuffer.h"
+
+template<class T>
+inline DX::ConstantBuffer<T>::~ConstantBuffer()
+{
+	if (buffer) buffer.Reset();
+}
 
 template<class T>
 ID3D11Buffer* DX::ConstantBuffer<T>::Get() const

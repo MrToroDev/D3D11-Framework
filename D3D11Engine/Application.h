@@ -3,13 +3,14 @@
 #include "Definitions.h"
 #include <Window/Window.h>
 #include <Window/Graphic.h>
+#include <System/AssetManager.h>
 #include <Utils/StateMachine.h>
+#include <Console.h>
+#include <Logger.h>
 #include <iostream>
 #include <dxgidebug.h>
 #include <memory>
 #include <nlohmann/json.hpp>
-#include <Console.h>
-#include <Logger.h>
 #include "Physics.h"
 #include <imgui.h>
 #include <imgui_impl_dx11.h>
@@ -23,7 +24,8 @@ struct ApplicationData
 	DX::Graphic* D3Dgraphic = nullptr;
 	DX::StateMachine STmachine;
 	DX::Console debugConsole;
-	
+	DX::AssetManager assetManager;
+
 	PhysicWorld physicWorld;
 	
 	// Options files

@@ -29,11 +29,6 @@ namespace DX
 	public:
 		Mesh(
 			Microsoft::WRL::ComPtr<ID3D11Device> dev,
-			std::wstring pixelShader, std::string psmain,
-			std::wstring vertexShader, std::string vsmain,
-			std::vector<VertexTexture> v, std::vector<int> indices);
-		Mesh(
-			Microsoft::WRL::ComPtr<ID3D11Device> dev,
 			std::wstring ShaderFile, std::string psmain, std::string vsmain,
 			std::vector<VertexTexture> v, std::vector<int> indices);
 		Mesh(

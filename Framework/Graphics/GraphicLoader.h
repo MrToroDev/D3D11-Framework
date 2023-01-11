@@ -14,5 +14,11 @@ namespace DX
         const std::string_view profile,
         Microsoft::WRL::ComPtr<ID3DBlob>& shaderBlob);
 
+    bool CompileShaderFromStream(
+        const std::vector<unsigned char> fileData,
+        const std::string_view entryPoint,
+        const std::string_view profile,
+        Microsoft::WRL::ComPtr<ID3DBlob>& shaderBlob);
+
     std::vector<unsigned char> ReadFile(std::string file);
 }

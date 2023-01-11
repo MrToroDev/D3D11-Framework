@@ -34,8 +34,6 @@ namespace DX {
 		Microsoft::WRL::ComPtr<ID3D11DepthStencilView> depthStencilView = nullptr;
 		Microsoft::WRL::ComPtr<ID3D11DepthStencilState> depthStencilState = nullptr;
 		Microsoft::WRL::ComPtr<ID3D11Texture2D> depthStencilBuffer = nullptr;
-		Microsoft::WRL::ComPtr<ID3D11Device> devRef = nullptr;
-		Microsoft::WRL::ComPtr<ID3D11DeviceContext> devconRef = nullptr;
 		Microsoft::WRL::ComPtr<ID3D11SamplerState> textureST = nullptr;
 		Microsoft::WRL::ComPtr<ID3D11RasterizerState> rasterizerState = nullptr;
 		Microsoft::WRL::ComPtr<ID3D11BlendState> blendState = nullptr;
@@ -54,13 +52,13 @@ namespace DX {
 
 		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> GetTextureSRV();
 
-		void SetConstantBufferData(bool hdr, float hdrExposure, float gamma, bool mosaic, float mosaicStrenght, float clock);
-		void Clear(float color[4]);
-		void SetRenderTarget(int width, int height);
-		void SetBlendState(float blendFactor[4]);
-		void UnBoundBlendState();
-		void UnBoundTarget();
-		void Draw();
+		void SetConstantBufferData(Microsoft::WRL::ComPtr<ID3D11DeviceContext> devcon, bool hdr, float hdrExposure, float gamma, bool mosaic, float mosaicStrenght, float clock);
+		void Clear(Microsoft::WRL::ComPtr<ID3D11DeviceContext> devcon, float color[4]);
+		void SetRenderTarget(Microsoft::WRL::ComPtr<ID3D11Device> dev, Microsoft::WRL::ComPtr<ID3D11DeviceContext> devcon, int width, int height);
+		void SetBlendState(Microsoft::WRL::ComPtr<ID3D11DeviceContext> devcon, float blendFactor[4]);
+		void UnBoundBlendState(Microsoft::WRL::ComPtr<ID3D11DeviceContext> devcon);
+		void UnBoundTarget(Microsoft::WRL::ComPtr<ID3D11DeviceContext> devcon);
+		void Draw(Microsoft::WRL::ComPtr<ID3D11DeviceContext> devcon);
 	};
 }
 

@@ -46,11 +46,13 @@ namespace DX
 		void UnBoundRenderTarget();
 		void Present(int vsync);
 		void SetViewport(int width, int height, int x, int y);
+		void ClearStateFlush();
 
 		bool isFullscreen() const;
 		void SetFullScreen(bool fullscreen);
 		ComPtr<ID3D11Device> getDevice();
 		ComPtr<ID3D11DeviceContext> getDeviceContext();
+		ComPtr<IDXGIFactory2> getFactory();
 		ComPtr<ID3D11RenderTargetView> getRenderTarget();
 	};
 }

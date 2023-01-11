@@ -1,10 +1,35 @@
 #include "Mesh.h"
 #include "GraphicLoader.h"
+#include "../Utils/Utils.h"
 #include "../COMException.h"
+#include <filesystem>
 
 void DX::Mesh::initShaders(Microsoft::WRL::ComPtr<ID3D11Device> dev, std::wstring p, std::wstring v, std::string vmain, std::string pmain)
 {
-    if (!CompileShaderFromFile(p, pmain.c_str(), "ps_5_0", pixelShaderBlob)) {
+    if (p.substr(p.find_last_of('.') + 1) == L"hlsl" && v.substr(p.find_last_of('.') + 1) == L"hlsl") {
+        if (!CompileShaderFromFile(p.c_str(), pmain.c_str(), "ps_5_0", pixelShaderBlob)) {
+            return;
+        }
+
+        if (!CompileShaderFromFile(v.c_str(), vmain.c_str(), "vs_5_0", vertexShaderBlob)) {
+            return;
+        }
+    }
+    else if (p.substr(p.find_last_of('.') + 1) == L"cso" && v.substr(p.find_last_of('.') + 1) == L"cso") {
+        auto psData = DX::ReadFile(DX::to_string(p));
+
+        if (!CompileShaderFromStream(psData, pmain.c_str(), "ps_5_0", pixelShaderBlob)) {
+            return;
+        }
+
+        auto vsData = DX::ReadFile(DX::to_string(v));
+
+        if (!CompileShaderFromStream(vsData, vmain.c_str(), "vs_5_0", vertexShaderBlob)) {
+            return;
+        }
+    }
+    else {
+        MessageBoxA(NULL, "NO SHADER PASSED IN PARAMETER!", "Shading Compile Error", MB_ICONWARNING | MB_OK);
         return;
     }
 
@@ -13,11 +38,6 @@ void DX::Mesh::initShaders(Microsoft::WRL::ComPtr<ID3D11Device> dev, std::wstrin
         pixelShaderBlob->GetBufferSize(),
         nullptr,
         &pixelShader));
-
-
-    if (!CompileShaderFromFile(v, vmain.c_str(), "vs_5_0", vertexShaderBlob)) {
-        return;
-    }
 
     DX_CHECK(dev->CreateVertexShader(
         vertexShaderBlob->GetBufferPointer(),
@@ -159,17 +179,6 @@ void DX::Mesh::initInputLayout_V(Microsoft::WRL::ComPtr<ID3D11Device> dev)
         &inputLayout));
 }
 
-DX::Mesh::Mesh(
-    Microsoft::WRL::ComPtr<ID3D11Device> dev,
-    std::wstring pixelShader, std::string psmain,
-    std::wstring vertexShader, std::string vsmain,
-    std::vector<VertexTexture> v, std::vector<int> indices)
-{
-    this->initShaders(dev, pixelShader, vertexShader, vsmain, psmain);
-    this->initInputLayout(dev);
-    this->initBuffer(dev, v, indices);
-}
-
 DX::Mesh::Mesh(Microsoft::WRL::ComPtr<ID3D11Device> dev, std::wstring ShaderFile, std::string psmain, std::string vsmain, std::vector<VertexTexture> v, std::vector<int> indices)
 {
     this->initShaders(dev, ShaderFile, ShaderFile, vsmain, psmain);
@@ -187,13 +196,13 @@ DX::Mesh::Mesh(Microsoft::WRL::ComPtr<ID3D11Device> dev, std::wstring ShaderFile
 
 DX::Mesh::~Mesh()
 {
-    this->pixelShader.Reset();
-    this->pixelShaderBlob.Reset();
-    this->vertexShader.Reset();
-    this->vertexShaderBlob.Reset();
-    this->inputLayout.Reset();
-    this->Vbuffer.Reset();
-    this->Ibuffer.Reset();
+    if (pixelShader) this->pixelShader.Reset();
+    if (pixelShaderBlob) this->pixelShaderBlob.Reset();
+    if (vertexShader) this->vertexShader.Reset();
+    if (vertexShaderBlob) this->vertexShaderBlob.Reset();
+    if (inputLayout) this->inputLayout.Reset();
+    if (Vbuffer) this->Vbuffer.Reset();
+    if (Ibuffer) this->Ibuffer.Reset();
 }
 
 void DX::Mesh::prepareDraw(Microsoft::WRL::ComPtr<ID3D11DeviceContext> devcon)
@@ -201,7 +210,7 @@ void DX::Mesh::prepareDraw(Microsoft::WRL::ComPtr<ID3D11DeviceContext> devcon)
     UINT vertexOffset = 0;
     UINT vertexStride;
     if (!isVertexRawFloat) vertexStride = sizeof(DX::VertexTexture);
-    else vertexStride = 8 * 4;
+    else vertexStride = 8 * 4; // stride = (vertex_byte_size + uv_byte_size + normal_byte_size) * float_byte_size;
 
     devcon->IASetInputLayout(inputLayout.Get());
     devcon->IASetVertexBuffers(

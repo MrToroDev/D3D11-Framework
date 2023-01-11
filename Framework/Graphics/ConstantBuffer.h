@@ -14,13 +14,11 @@ namespace DX {
 	class ConstantBuffer
 	{
 	private:
-		ConstantBuffer(const ConstantBuffer<T>& rhs);
-
-	private:
 		Microsoft::WRL::ComPtr<ID3D11Buffer> buffer;
 
 	public:
 		ConstantBuffer() {}
+		~ConstantBuffer();
 
 		T data;
 

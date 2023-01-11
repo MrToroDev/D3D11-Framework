@@ -111,7 +111,7 @@ DX::Texture::Texture(Pixel* pixels, int width, int height, Microsoft::WRL::ComPt
 
 DX::Texture::~Texture()
 {
-	this->textureSRV.Reset();
+	if (textureSRV) this->textureSRV.Reset();
 }
 
 void DX::Texture::Bind(Microsoft::WRL::ComPtr<ID3D11DeviceContext> devcon, int count)

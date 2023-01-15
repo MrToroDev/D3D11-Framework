@@ -24,7 +24,8 @@ private:
 	{
 		DirectX::XMFLOAT4X4 projection, view, worldPos;
 	};
-	float viewRotation;
+
+	float tX;
 
 private:
 	bool showEditor;

@@ -1,6 +1,8 @@
 #include "EditorState.h"
 #include <Utils\Utils.h>
 
+using namespace DirectX;
+
 EditorState::EditorState(ApplicationDataRef data)
 	: _data(data)
 {
@@ -95,23 +97,48 @@ void EditorState::init()
 	triangle = new DX::Mesh(_data->D3Dgraphic->getDevice(), DX::to_wstring(_data->assetManager.GetShader("triangle")), "PSMain", "VSMain", triangle_v, triangle_i);
 	cube = new DX::Mesh(_data->D3Dgraphic->getDevice(), DX::to_wstring(_data->assetManager.GetShader("cube")), "PSMain", "VSMain", cube_v, cube_i);
 	cbuffer_Cube.Initialize(_data->D3Dgraphic->getDevice().Get());
-	
-	camera.SetPosition(-10, 0, 0);
 }
 
 void EditorState::update(float dt)
 {
-	camera.SetRotation(0, DirectX::XMConvertToRadians(viewRotation), 0);
+	{
+		float speed = 10.0f;
+
+		if (_data->window->KeyPressed(GLFW_KEY_W)) {
+			camera.AdjustPosition(camera.GetForwardVector() * speed * dt);
+		}
+		if (_data->window->KeyPressed(GLFW_KEY_S)) {
+			camera.AdjustPosition(camera.GetBackwardVector() * speed * dt);
+		}
+		if (_data->window->KeyPressed(GLFW_KEY_A)) {
+			camera.AdjustPosition(camera.GetLeftVector() * speed * dt);
+		}
+		if (_data->window->KeyPressed(GLFW_KEY_D)) {
+			camera.AdjustPosition(camera.GetRightVector() * speed * dt);
+		}
+
+		float sensitivity = 0.1f;
+
+		if (_data->window->KeyPressed(GLFW_KEY_LEFT)) {
+			camera.AdjustRotation(0, -sensitivity * dt, 0);
+		}
+		if (_data->window->KeyPressed(GLFW_KEY_RIGHT)) {
+			camera.AdjustRotation(0, sensitivity * dt, 0);
+		}
+	}
+
 	_renderTarget->SetConstantBufferData(_data->D3Dgraphic->getDeviceContext(), false, 1.0f, 2.1f, false, 128, dt);
 
 	DirectX::XMMATRIX _p = DirectX::XMMatrixPerspectiveFovLH(
-		(60.0f * DirectX::XM_PI) / 360,
-		static_cast<float>(_data->window->GetWidth() / _data->window->GetHeight()),
-		0.1f, 100.0f);
+		(60.0f / 360.0f) / DirectX::XM_2PI,
+		static_cast<float>(_data->window->GetWidth()) / static_cast<float>(_data->window->GetHeight()),
+		0.1f, 1000.0f);
 
-	DirectX::XMStoreFloat4x4(&cbuffer_Cube.data.projection, _p);
-	DirectX::XMStoreFloat4x4(&cbuffer_Cube.data.view, camera.GetViewMatrix());
-	DirectX::XMStoreFloat4x4(&cbuffer_Cube.data.worldPos, DirectX::XMMatrixIdentity());
+	DirectX::XMMATRIX _m = DirectX::XMMatrixRotationX(DirectX::XMConvertToRadians(tX));
+
+	DirectX::XMStoreFloat4x4(&cbuffer_Cube.data.projection, DirectX::XMMatrixTranspose(_p));
+	DirectX::XMStoreFloat4x4(&cbuffer_Cube.data.view, DirectX::XMMatrixTranspose(camera.GetViewMatrix()));
+	DirectX::XMStoreFloat4x4(&cbuffer_Cube.data.worldPos, DirectX::XMMatrixTranspose(_m));
 	cbuffer_Cube.ApplyChanges(_data->D3Dgraphic->getDeviceContext().Get());
 }
 
@@ -157,9 +184,9 @@ void EditorState::draw()
 	cbuffer_Cube.Bind(_data->D3Dgraphic->getDeviceContext().Get(), 0, DX::ConstantBuffer_BindType::VertexShader);
 	triangle->Draw(_data->D3Dgraphic->getDeviceContext(), 3);
 
-	cube->prepareDraw(_data->D3Dgraphic->getDeviceContext());
+	/*cube->prepareDraw(_data->D3Dgraphic->getDeviceContext());
 	cbuffer_Cube.Bind(_data->D3Dgraphic->getDeviceContext().Get(), 0, DX::ConstantBuffer_BindType::VertexShader);
-	cube->Draw(_data->D3Dgraphic->getDeviceContext(), 36);
+	cube->Draw(_data->D3Dgraphic->getDeviceContext(), 36);*/
 
 	spriteBatch->Begin();
 	std::stringstream ss;
@@ -175,11 +202,11 @@ void EditorState::draw()
 	if (showEditor) {
 		int flags = ImGuiWindowFlags_::ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_::ImGuiWindowFlags_NoScrollWithMouse;
 		ImGui::Begin("Viewport", (bool*)0, flags);
-		ImGui::Image((ImTextureID)_renderTarget->GetTextureSRV().Get(), ImVec2(ImGui::GetWindowWidth(), ImGui::GetWindowHeight() - 30));
+		ImGui::Image((ImTextureID)_renderTarget->GetTextureSRV().Get(), ImVec2(ImGui::GetWindowWidth(), ImGui::GetWindowHeight() - 35));
 		ImGui::End();
 
 		ImGui::Begin("Editor");
-		ImGui::SliderAngle("X View", &viewRotation, 0.0f);
+		ImGui::SliderFloat("#object_triangle_x", &tX, 0.0f, 360.0f);
 		ImGui::End();
 	}
 

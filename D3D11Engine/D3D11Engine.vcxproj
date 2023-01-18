@@ -163,6 +163,9 @@
     <ClInclude Include="States\EditorState.h" />
     <ClInclude Include="Physics.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Assets\Models\Cube.mesh" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

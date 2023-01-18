@@ -5,6 +5,7 @@ struct VSInput
     float3 position : POSITION;
     float3 normal : NORMAL0;
     float2 uv : TEXCOORD0;
+    float3 color : COLOR0;
 };
 
 struct VSOutput
@@ -12,6 +13,7 @@ struct VSOutput
     float2 uv : TEXCOORD;
     float3 normal : NORMAL;
     float4 pos : SV_Position;
+    float3 color : COLOR;
 };
 
 // Vertex Shader
@@ -30,6 +32,7 @@ VSOutput VSMain(VSInput input)
     output.pos = mul(output.pos, view);
     output.pos = mul(output.pos, projection);
     output.uv = input.uv;
+    output.color = input.color;
     return output;
 }
 
@@ -44,7 +47,7 @@ PixelOutput PSMain(VSOutput input)
 {
     PixelOutput output;
     
-    output.PixelColor = float4(0, 1, 0, 1);
+    output.PixelColor = float4(input.color, 1);
     
     return output;
 }

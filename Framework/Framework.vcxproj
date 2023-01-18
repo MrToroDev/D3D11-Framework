@@ -184,7 +184,9 @@
     <ClInclude Include="Audio\SoundDevice.h" />
     <ClInclude Include="Audio\SoundSource.h" />
     <ClInclude Include="COMException.h" />
+    <ClInclude Include="Components\Transform.h" />
     <ClInclude Include="Console.h" />
+    <ClInclude Include="EntityComponentSystem.h" />
     <ClInclude Include="Graphics\Camera.h" />
     <ClInclude Include="Graphics\ConstantBuffer.h" />
     <ClInclude Include="Graphics\GraphicLoader.h" />

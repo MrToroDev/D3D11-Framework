@@ -1,4 +1,5 @@
 #include "EditorState.h"
+#include <Graphics\GraphicLoader.h>
 #include <Utils\Utils.h>
 
 using namespace DirectX;
@@ -69,7 +70,7 @@ void EditorState::init()
 	};
 
 	std::vector<int> cube_i = {
-		// Front Face
+			// Front Face
 			0,  1,  2,
 			0,  2,  3,
 
@@ -93,12 +94,12 @@ void EditorState::init()
 			20, 21, 22,
 			20, 22, 23
 	};
-
-	triangle = new DX::Mesh(_data->D3Dgraphic->getDevice(), DX::to_wstring(_data->assetManager.GetShader("triangle")), "PSMain", "VSMain", triangle_v, triangle_i);
-	cube = new DX::Mesh(_data->D3Dgraphic->getDevice(), DX::to_wstring(_data->assetManager.GetShader("cube")), "PSMain", "VSMain", cube_v, cube_i);
 	cbuffer_Cube.Initialize(_data->D3Dgraphic->getDevice().Get());
-}
 
+	auto test = DX::LoadMeshFile("Assets/Models/Cube.mesh");
+
+	mesh_test = new DX::Mesh(_data->D3Dgraphic->getDevice(), DX::to_wstring(_data->assetManager.GetShader("cube")), "PSMain", "VSMain", test.vertices, test.indices);
+}
 void EditorState::update(float dt)
 {
 	{
@@ -134,7 +135,11 @@ void EditorState::update(float dt)
 		static_cast<float>(_data->window->GetWidth()) / static_cast<float>(_data->window->GetHeight()),
 		0.1f, 1000.0f);
 
-	DirectX::XMMATRIX _m = DirectX::XMMatrixRotationX(DirectX::XMConvertToRadians(tX));
+	DirectX::XMMATRIX _m = DirectX::XMMatrixRotationRollPitchYaw(
+		DirectX::XMConvertToRadians(tX),
+		DirectX::XMConvertToRadians(tY),
+		DirectX::XMConvertToRadians(tZ)
+	);
 
 	DirectX::XMStoreFloat4x4(&cbuffer_Cube.data.projection, DirectX::XMMatrixTranspose(_p));
 	DirectX::XMStoreFloat4x4(&cbuffer_Cube.data.view, DirectX::XMMatrixTranspose(camera.GetViewMatrix()));
@@ -180,14 +185,6 @@ void EditorState::draw()
 	_renderTarget->Clear(_data->D3Dgraphic->getDeviceContext(), color);
 	_renderTarget->SetRenderTarget(_data->D3Dgraphic->getDevice(), _data->D3Dgraphic->getDeviceContext(), _data->window->GetWidth(), _data->window->GetHeight());
 
-	triangle->prepareDraw(_data->D3Dgraphic->getDeviceContext());
-	cbuffer_Cube.Bind(_data->D3Dgraphic->getDeviceContext().Get(), 0, DX::ConstantBuffer_BindType::VertexShader);
-	triangle->Draw(_data->D3Dgraphic->getDeviceContext(), 3);
-
-	/*cube->prepareDraw(_data->D3Dgraphic->getDeviceContext());
-	cbuffer_Cube.Bind(_data->D3Dgraphic->getDeviceContext().Get(), 0, DX::ConstantBuffer_BindType::VertexShader);
-	cube->Draw(_data->D3Dgraphic->getDeviceContext(), 36);*/
-
 	spriteBatch->Begin();
 	std::stringstream ss;
 	ss << (int)_data->FPS << " FPS" << std::endl << _data->CPU_TIME << " ms";
@@ -195,10 +192,14 @@ void EditorState::draw()
 	spriteFont->DrawString(spriteBatch, ss.str().c_str(), DirectX::XMFLOAT2(0, 0), DirectX::Colors::White, 0.0f, DirectX::XMFLOAT2(0, 0), 2);
 	spriteBatch->End();
 
+	mesh_test->prepareDraw(_data->D3Dgraphic->getDeviceContext());
+	cbuffer_Cube.Bind(_data->D3Dgraphic->getDeviceContext().Get(), 0, DX::ConstantBuffer_BindType::VertexShader);
+	mesh_test->Draw(_data->D3Dgraphic->getDeviceContext(), 36);
+
 	_renderTarget->UnBoundTarget(_data->D3Dgraphic->getDeviceContext());
 
 	_data->D3Dgraphic->SetRenderTarget();
-
+	
 	if (showEditor) {
 		int flags = ImGuiWindowFlags_::ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_::ImGuiWindowFlags_NoScrollWithMouse;
 		ImGui::Begin("Viewport", (bool*)0, flags);
@@ -206,7 +207,9 @@ void EditorState::draw()
 		ImGui::End();
 
 		ImGui::Begin("Editor");
-		ImGui::SliderFloat("#object_triangle_x", &tX, 0.0f, 360.0f);
+		ImGui::SliderFloat("Cube X", &tX, 0, 360);
+		ImGui::SliderFloat("Cube Y", &tY, 0, 360);
+		ImGui::SliderFloat("Cube Z", &tZ, 0, 360);
 		ImGui::End();
 	}
 
@@ -225,7 +228,5 @@ void EditorState::destroy()
 {
 	delete spriteBatch;
 	delete spriteFont;
-	delete triangle;
-	delete cube;
 	delete _renderTarget;
 }

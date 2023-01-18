@@ -127,6 +127,15 @@ void DX::Mesh::initInputLayout(Microsoft::WRL::ComPtr<ID3D11Device> dev)
             D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA,
             0
         },
+        {
+            "COLOR",
+            0,
+            DXGI_FORMAT::DXGI_FORMAT_R32G32B32_FLOAT,
+            0,
+            offsetof(DX::VertexTexture, color),
+            D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA,
+            0
+        },
     };
 
     DX_CHECK(dev->CreateInputLayout(
@@ -164,6 +173,15 @@ void DX::Mesh::initInputLayout_V(Microsoft::WRL::ComPtr<ID3D11Device> dev)
             "TEXCOORD",
             0,
             DXGI_FORMAT::DXGI_FORMAT_R32G32_FLOAT,
+            0,
+            D3D11_APPEND_ALIGNED_ELEMENT,
+            D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA,
+            0
+        },
+        {
+            "COLOR",
+            0,
+            DXGI_FORMAT::DXGI_FORMAT_R32G32B32_FLOAT,
             0,
             D3D11_APPEND_ALIGNED_ELEMENT,
             D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA,
@@ -210,7 +228,7 @@ void DX::Mesh::prepareDraw(Microsoft::WRL::ComPtr<ID3D11DeviceContext> devcon)
     UINT vertexOffset = 0;
     UINT vertexStride;
     if (!isVertexRawFloat) vertexStride = sizeof(DX::VertexTexture);
-    else vertexStride = 8 * 4; // stride = (vertex_byte_size + uv_byte_size + normal_byte_size) * float_byte_size;
+    else vertexStride = 11 * 4; // stride = (vertex_size + uv_size + normal_size + color_size) * float_byte_size;
 
     devcon->IASetInputLayout(inputLayout.Get());
     devcon->IASetVertexBuffers(

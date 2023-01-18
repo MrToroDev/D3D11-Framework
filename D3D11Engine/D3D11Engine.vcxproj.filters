@@ -42,4 +42,7 @@
       <Filter>File di intestazione</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Assets\Models\Cube.mesh" />
+  </ItemGroup>
 </Project>

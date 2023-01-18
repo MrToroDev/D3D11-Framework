@@ -193,5 +193,11 @@
     <ClInclude Include="System\AssetManager.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
+    <ClInclude Include="EntityComponentSystem.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\Transform.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

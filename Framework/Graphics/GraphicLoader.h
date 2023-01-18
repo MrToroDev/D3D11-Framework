@@ -5,6 +5,7 @@
 #include <string>
 #include <d3d11_2.h>
 #include <vector>
+#include "Vertex.h"
 
 namespace DX
 {
@@ -21,4 +22,12 @@ namespace DX
         Microsoft::WRL::ComPtr<ID3DBlob>& shaderBlob);
 
     std::vector<unsigned char> ReadFile(std::string file);
+
+    struct MeshData
+    {
+        std::vector<VertexTexture> vertices;
+        std::vector<int> indices;
+    };
+
+    MeshData LoadMeshFile(std::string file);
 }

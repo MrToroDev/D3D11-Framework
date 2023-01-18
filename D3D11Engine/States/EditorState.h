@@ -26,15 +26,16 @@ private:
 	};
 
 	float tX;
+	float tY;
+	float tZ;
 
 private:
 	bool showEditor;
 	ApplicationDataRef _data;
 	DX::RenderTarget<DX::RenderType::RenderTarget>* _renderTarget;
-	DX::Mesh* triangle;
-	DX::Mesh* cube;
 	DX::ConstantBuffer<MVPData> cbuffer_Cube;
 	DX::Camera camera;
+	DX::Mesh* mesh_test;
 	DirectX::DX11::SpriteBatch* spriteBatch;
 	DirectX::DX11::SpriteFont* spriteFont;
 };

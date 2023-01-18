@@ -3,6 +3,7 @@ struct VSInput
     float3 position : POSITION;
     float2 uv : TEXCOORD;
     float3 normal : NORMAL;
+    float3 color : COLOR;
 };
 
 struct PSInput
@@ -10,6 +11,7 @@ struct PSInput
     float4 pos : SV_Position;
     float2 uv : TEXCOORD;
     float3 normal : NORMAL;
+    float3 color : COLOR;
 };
 
 cbuffer MVPData : register(b0)
@@ -28,11 +30,12 @@ PSInput VSMain(VSInput input)
     output.pos = mul(output.pos, projection);
     output.normal = input.normal;
     output.uv = input.uv;
+    output.color = input.color;
     
     return output;
 }
 
 float4 PSMain(PSInput input) : SV_Target
 {
-    return float4(0, 1, 0, 1);
+    return float4(input.color, 1);
 }

@@ -43,7 +43,7 @@ void DX::LogError(std::string text)
 
 void DX::LogCritic(std::string text)
 {
-	std::string ss = "[OK] ";
+	std::string ss = "[CRITIC] ";
 	ss.append(text);
 	ss.append("\n");
 	OutputDebugStringA(ss.c_str());

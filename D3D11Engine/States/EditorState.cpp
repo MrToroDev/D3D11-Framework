@@ -102,31 +102,6 @@ void EditorState::init()
 }
 void EditorState::update(float dt)
 {
-	{
-		float speed = 10.0f;
-
-		if (_data->window->KeyPressed(GLFW_KEY_W)) {
-			camera.AdjustPosition(camera.GetForwardVector() * speed * dt);
-		}
-		if (_data->window->KeyPressed(GLFW_KEY_S)) {
-			camera.AdjustPosition(camera.GetBackwardVector() * speed * dt);
-		}
-		if (_data->window->KeyPressed(GLFW_KEY_A)) {
-			camera.AdjustPosition(camera.GetLeftVector() * speed * dt);
-		}
-		if (_data->window->KeyPressed(GLFW_KEY_D)) {
-			camera.AdjustPosition(camera.GetRightVector() * speed * dt);
-		}
-
-		float sensitivity = 0.1f;
-
-		if (_data->window->KeyPressed(GLFW_KEY_LEFT)) {
-			camera.AdjustRotation(0, -sensitivity * dt, 0);
-		}
-		if (_data->window->KeyPressed(GLFW_KEY_RIGHT)) {
-			camera.AdjustRotation(0, sensitivity * dt, 0);
-		}
-	}
 
 	_renderTarget->SetConstantBufferData(_data->D3Dgraphic->getDeviceContext(), false, 1.0f, 2.1f, false, 128, dt);
 

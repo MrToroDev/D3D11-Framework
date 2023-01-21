@@ -14,7 +14,6 @@
 #include "Physics.h"
 #include <imgui.h>
 #include <imgui_impl_dx11.h>
-#include <imgui_impl_glfw.h>
 
 using json = nlohmann::json;
 

@@ -57,9 +57,9 @@ void Graphic::CreateSwapChain()
     backBufferTexture->Release();
 }
 
-Graphic::Graphic(Window** win, bool fullscreen)
+Graphic::Graphic(Window* win, bool fullscreen)
 {
-    winRef = *win;
+    winRef = win;
 #if defined (_DEBUG)
     int dxgiflag = DXGI_CREATE_FACTORY_DEBUG;
 #else

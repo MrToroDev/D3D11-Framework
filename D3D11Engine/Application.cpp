@@ -6,6 +6,7 @@
 #include <Utils/Utils.h>
 #include "States/EditorState.h"
 #include <time.h>
+#include <imgui_impl_win32.h>
 
 #pragma comment(lib, "dxgi.lib")
 
@@ -172,15 +173,16 @@ void Application::HandleDebugMessage()
 
 void Application::InitWinGraphic(HINSTANCE hinstance)
 {
+	DX::WindowDataInfo wInfo;
+	wInfo.resizable = true;
+	wInfo.useIcon = false;
+
 	data->window = new DX::Window(
-		std::string(APP_NAME).append(" : ").append(APP_VERSION).c_str(),
-		data->GraphicSettings["Window"]["width"],
-		data->GraphicSettings["Window"]["height"], true
+		hinstance, "FrameWork Test", 500, 500, wInfo
 	);
-	data->window->SetIconImage("Assets/gfx/dxImage.jpg");
 	DX::LogInfo("Window Created!");
 
-	data->D3Dgraphic = new DX::Graphic(&data->window, data->GraphicSettings["Window"]["fullscreen"]);
+	data->D3Dgraphic = new DX::Graphic(data->window, data->GraphicSettings["Window"]["fullscreen"]);
 	DX::LogInfo("Graphic Initialized! {DXGI - D3D11}");
 
 #if defined(_DEBUG)
@@ -223,7 +225,7 @@ void Application::InitImgui()
 	style->ScrollbarSize = 20;
 	style->ScrollbarRounding = 0;
 
-	ImGui_ImplGlfw_InitForOther(data->window->GetWindow(), true);
+	ImGui_ImplWin32_Init(data->window->GetHandle());
 	ImGui_ImplDX11_Init(data->D3Dgraphic->getDevice().Get(), data->D3Dgraphic->getDeviceContext().Get());
 
 	DX::LogInfo("ImGui Initialized!");
@@ -315,8 +317,8 @@ Application::~Application()
 	DX::LogInfo("Destroying Window...");
 	delete data->window;
 	DX::LogInfo("Shutting Down ImGui...");
+	ImGui_ImplWin32_Shutdown();
 	ImGui_ImplDX11_Shutdown();
-	ImGui_ImplGlfw_Shutdown();
 	ImGui::DestroyContext();
 	DX::LogInfo("Destroying State objects...");
 	data->STmachine.GetActiveState()->destroy();
@@ -338,22 +340,18 @@ bool Application::is_open()
 
 void Application::update()
 {
-	data->window->PollEvents();
 	data->STmachine.ProcessChanges();
+	data->window->PoolEvents();
 
 #if defined(_DEBUG)
 	HandleDebugMessage();
 #endif
 
-	float time = float(glfwGetTime());
-	dt = time - lasttime;
-
-	if (dt >= 1.0f / data->FrameLimit && data->window->IsFocusing()) {
+	if (dt >= 1.0f / data->FrameLimit) {
 		data->FPS = 1.0f / dt;
 		// Fix the cpu time to 2 decimal precision
 		float value = (int)((dt * 1000) * 100 + .5);
 		data->CPU_TIME = (float)value / 100;
-		lasttime = time;
 		data->STmachine.GetActiveState()->update(dt);
 		data->physicWorld.mScene->simulate(dt);
 		data->physicWorld.mScene->fetchResults(true);
@@ -364,27 +362,27 @@ void Application::draw()
 {
 	if (dt >= 1.0f / data->FrameLimit) {
 		auto startTime = std::chrono::high_resolution_clock::now();
-		float color[] = { 0, 0, 0, 1.0 };
+		float color[] = { 1, 0, 0, 1.0 };
 		data->D3Dgraphic->Clear(color);
 		data->D3Dgraphic->SetRenderTarget();
 		data->D3Dgraphic->UpdateSwapChain();
 		data->D3Dgraphic->SetViewport(data->window->GetWidth(), data->window->GetHeight(), 0, 0);
-		ImGui_ImplDX11_NewFrame();
-		ImGui_ImplGlfw_NewFrame();
-		ImGui::NewFrame();
+		//ImGui_ImplDX11_NewFrame();
+		//ImGui_ImplWin32_NewFrame();
+		//ImGui::NewFrame();
 
-		ImGui::DockSpaceOverViewport(ImGui::GetWindowViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
+		//ImGui::DockSpaceOverViewport(ImGui::GetWindowViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
 
-		// Draw
-		data->STmachine.GetActiveState()->draw();
+		//// Draw
+		//data->STmachine.GetActiveState()->draw();
 
-		ImGui::Render();
-		ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
-		if (io->ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-		{
-			ImGui::UpdatePlatformWindows();
-			ImGui::RenderPlatformWindowsDefault();
-		}
+		//ImGui::Render();
+		//ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+		//if (io->ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+		//{
+		//	ImGui::UpdatePlatformWindows();
+		//	ImGui::RenderPlatformWindowsDefault();
+		//}
 		data->D3Dgraphic->Present(data->vsync);
 
 		data->GPU_TIME = data->D3Dgraphic->GetGPUTime();

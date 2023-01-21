@@ -153,7 +153,7 @@
     <ClCompile Include="..\lib source\imgui_demo.cpp" />
     <ClCompile Include="..\lib source\imgui_draw.cpp" />
     <ClCompile Include="..\lib source\imgui_impl_dx11.cpp" />
-    <ClCompile Include="..\lib source\imgui_impl_glfw.cpp" />
+    <ClCompile Include="..\lib source\imgui_impl_win32.cpp" />
     <ClCompile Include="..\lib source\imgui_tables.cpp" />
     <ClCompile Include="..\lib source\imgui_widgets.cpp" />
     <ClCompile Include="Audio\Listener.cpp" />
@@ -175,7 +175,6 @@
     <ClCompile Include="Utils\StateMachine.cpp" />
     <ClCompile Include="Utils\Utils.cpp" />
     <ClCompile Include="Window\Graphic.cpp" />
-    <ClCompile Include="Window\Joystick.cpp" />
     <ClCompile Include="Window\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -206,7 +205,6 @@
     <ClInclude Include="Utils\States.h" />
     <ClInclude Include="Utils\Utils.h" />
     <ClInclude Include="Window\Graphic.h" />
-    <ClInclude Include="Window\Joystick.h" />
     <ClInclude Include="Window\Window.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

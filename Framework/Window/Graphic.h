@@ -31,7 +31,7 @@ namespace DX
 		void CreateSwapChain();
 
 	public:
-		Graphic(Window** win, bool fullscreen);
+		Graphic(Window* win, bool fullscreen);
 		~Graphic();
 
 		/// <summary>

@@ -1,6 +1,7 @@
 #pragma once
 
 #define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
 #include <Windows.h>
 
 namespace DX {
@@ -29,6 +30,5 @@ namespace DX {
 		HINSTANCE _instance;
 		HWND hWnd;
 		MSG msg = {};
-		WNDCLASSEX wc;
 	};
 }

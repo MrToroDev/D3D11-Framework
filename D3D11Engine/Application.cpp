@@ -175,10 +175,12 @@ void Application::InitWinGraphic(HINSTANCE hinstance)
 {
 	DX::WindowDataInfo wInfo;
 	wInfo.resizable = true;
-	wInfo.useIcon = false;
 
 	data->window = new DX::Window(
-		hinstance, "FrameWork Test", 500, 500, wInfo
+		hinstance, APP_NAME, 
+		data->GraphicSettings["Window"]["width"],
+		data->GraphicSettings["Window"]["height"],
+		wInfo
 	);
 	DX::LogInfo("Window Created!");
 
@@ -347,7 +349,8 @@ void Application::update()
 	HandleDebugMessage();
 #endif
 
-	if (dt >= 1.0f / data->FrameLimit) {
+	// TODO: Make deltatime function
+	if (/*dt >= 1.0f / data->FrameLimit*/true) {
 		data->FPS = 1.0f / dt;
 		// Fix the cpu time to 2 decimal precision
 		float value = (int)((dt * 1000) * 100 + .5);
@@ -360,29 +363,30 @@ void Application::update()
 
 void Application::draw()
 {
-	if (dt >= 1.0f / data->FrameLimit) {
+	// TODO: Make deltatime function
+	if (/*dt >= 1.0f / data->FrameLimit*/true) {
 		auto startTime = std::chrono::high_resolution_clock::now();
-		float color[] = { 1, 0, 0, 1.0 };
+		float color[] = { 0, 0, 0, 1.0 };
 		data->D3Dgraphic->Clear(color);
 		data->D3Dgraphic->SetRenderTarget();
 		data->D3Dgraphic->UpdateSwapChain();
 		data->D3Dgraphic->SetViewport(data->window->GetWidth(), data->window->GetHeight(), 0, 0);
-		//ImGui_ImplDX11_NewFrame();
-		//ImGui_ImplWin32_NewFrame();
-		//ImGui::NewFrame();
+		ImGui_ImplDX11_NewFrame();
+		ImGui_ImplWin32_NewFrame();
+		ImGui::NewFrame();
 
-		//ImGui::DockSpaceOverViewport(ImGui::GetWindowViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
+		ImGui::DockSpaceOverViewport(ImGui::GetWindowViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
 
-		//// Draw
-		//data->STmachine.GetActiveState()->draw();
+		// Draw
+		data->STmachine.GetActiveState()->draw();
 
-		//ImGui::Render();
-		//ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
-		//if (io->ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-		//{
-		//	ImGui::UpdatePlatformWindows();
-		//	ImGui::RenderPlatformWindowsDefault();
-		//}
+		ImGui::Render();
+		ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+		if (io->ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+		{
+			ImGui::UpdatePlatformWindows();
+			ImGui::RenderPlatformWindowsDefault();
+		}
 		data->D3Dgraphic->Present(data->vsync);
 
 		data->GPU_TIME = data->D3Dgraphic->GetGPUTime();

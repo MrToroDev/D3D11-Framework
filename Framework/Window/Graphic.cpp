@@ -60,19 +60,10 @@ void Graphic::CreateSwapChain()
 Graphic::Graphic(Window* win, bool fullscreen)
 {
     winRef = win;
-#if defined (_DEBUG)
-    int dxgiflag = DXGI_CREATE_FACTORY_DEBUG;
-#else
-    int dxgiflag = 0;
-#endif
-    DX_CHECK(CreateDXGIFactory2(dxgiflag, IID_PPV_ARGS(&_dxgifactory)));
+
     constexpr D3D_FEATURE_LEVEL deviceFeatureLevel[] = {
         D3D_FEATURE_LEVEL::D3D_FEATURE_LEVEL_11_1,
-        D3D_FEATURE_LEVEL::D3D_FEATURE_LEVEL_11_0,
-        D3D_FEATURE_LEVEL::D3D_FEATURE_LEVEL_10_1,
-        D3D_FEATURE_LEVEL::D3D_FEATURE_LEVEL_10_0,
-        D3D_FEATURE_LEVEL::D3D_FEATURE_LEVEL_9_1,
-        D3D_FEATURE_LEVEL::D3D_FEATURE_LEVEL_9_3,
+        D3D_FEATURE_LEVEL::D3D_FEATURE_LEVEL_11_0
 
     };
     UINT deviceFlags = D3D11_CREATE_DEVICE_FLAG::D3D11_CREATE_DEVICE_BGRA_SUPPORT;
@@ -92,6 +83,24 @@ Graphic::Graphic(Window* win, bool fullscreen)
         nullptr,
         &devcon));
 
+    {
+        IDXGIDevice1* dxgiDevice;
+        HRESULT hResult = dev->QueryInterface(__uuidof(IDXGIDevice1), (void**)&dxgiDevice);
+        assert(SUCCEEDED(hResult));
+
+        IDXGIAdapter* dxgiAdapter;
+        hResult = dxgiDevice->GetAdapter(&dxgiAdapter);
+        assert(SUCCEEDED(hResult));
+        dxgiDevice->Release();
+
+        DXGI_ADAPTER_DESC adapterDesc;
+        dxgiAdapter->GetDesc(&adapterDesc);
+
+        hResult = dxgiAdapter->GetParent(__uuidof(IDXGIFactory2), (void**)&_dxgifactory);
+        assert(SUCCEEDED(hResult));
+        dxgiAdapter->Release();
+    }
+
     DXGI_SWAP_CHAIN_DESC1 swapChainDescriptor = {};
     swapChainDescriptor.Width = winRef->GetWidth();
     swapChainDescriptor.Height = winRef->GetHeight();
@@ -101,6 +110,7 @@ Graphic::Graphic(Window* win, bool fullscreen)
     swapChainDescriptor.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
     swapChainDescriptor.BufferCount = 2;
     swapChainDescriptor.SwapEffect = DXGI_SWAP_EFFECT::DXGI_SWAP_EFFECT_FLIP_DISCARD;
+    swapChainDescriptor.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
     swapChainDescriptor.Scaling = DXGI_SCALING_STRETCH;
     swapChainDescriptor.Flags = {};
 

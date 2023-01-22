@@ -135,7 +135,6 @@ void EditorState::draw()
 			| ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus
 			| ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoScrollbar;
 		ImGui::Begin("mainDockSpace", (bool*)0, windowFlag);
-		ImGui::DockSpace(ImGui::GetID("Dockspace"), ImVec2(), ImGuiDockNodeFlags_PassthruCentralNode);
 
 		if (ImGui::BeginMainMenuBar())
 		{

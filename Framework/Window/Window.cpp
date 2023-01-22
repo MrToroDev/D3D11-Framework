@@ -8,61 +8,61 @@ DX::Window::Window(HINSTANCE hInstance, const char* title, int width, int height
     : _instance(hInstance)
 {
 	const wchar_t CLASS_NAME[] = L"_FRAMEWORK_WINDOW_CLASS";
-    ZeroMemory(&wc, sizeof(WNDCLASSEX));
-	wc.lpszClassName = CLASS_NAME;
-	wc.hInstance = hInstance;
-	wc.lpfnWndProc = WindowProc;
-    if (data.useIcon) {
-        wc.hIcon = static_cast<HICON>(LoadImage( // returns a HANDLE so we have to cast to HICON
-            NULL,             // hInstance must be NULL when loading from a file
-            DX::to_wstring(data.iconFile).c_str(),   // the icon file name
-            IMAGE_ICON,       // specifies that the file is an icon
-            0,                // width of the image (we'll specify default later on)
-            0,                // height of the image
-            LR_LOADFROMFILE |  // we want to load a file (as opposed to a resource)
-            LR_DEFAULTSIZE |   // default metrics based on the type (IMAGE_ICON, 32x32)
-            LR_SHARED         // let the system release the handle when it's no longer used
-        ));
-    }
-    wc.style = CS_HREDRAW | CS_VREDRAW;
-    wc.cbClsExtra = 0;
-    wc.cbWndExtra = 0;
-    wc.hbrBackground = (HBRUSH)COLOR_WINDOW;
-    wc.lpszMenuName = NULL;
-    wc.cbSize = sizeof(WNDCLASSEX);
-    wc.cbClsExtra = NULL; 
-    wc.cbWndExtra = NULL;
-    wc.hCursor = LoadCursor(NULL, IDC_ARROW);
-    if (!RegisterClassEx(&wc)) {
-        MessageBox(NULL, L"Cannot Register the window class!", L"Framework Window Class", MB_OK | MB_ICONERROR);
+    WNDCLASSEXW winClass = {};
+    winClass.cbSize = sizeof(WNDCLASSEXW);
+    winClass.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
+    winClass.lpfnWndProc = &WindowProc;
+    winClass.hInstance = hInstance;
+    winClass.hIcon = LoadIconW(0, IDI_APPLICATION);
+    winClass.hCursor = LoadCursorW(0, IDC_ARROW);
+    winClass.lpszClassName = CLASS_NAME;
+    winClass.hIconSm = LoadIconW(0, IDI_APPLICATION);
+    //if (data.useIcon) {
+    //    HICON icon = static_cast<HICON>(LoadImage( // returns a HANDLE so we have to cast to HICON
+    //        NULL,             // hInstance must be NULL when loading from a file
+    //        DX::to_wstring(data.iconFile).c_str(),   // the icon file name
+    //        IMAGE_ICON,       // specifies that the file is an icon
+    //        0,                // width of the image (we'll specify default later on)
+    //        0,                // height of the image
+    //        LR_LOADFROMFILE |  // we want to load a file (as opposed to a resource)
+    //        LR_DEFAULTSIZE |   // default metrics based on the type (IMAGE_ICON, 32x32)
+    //        LR_SHARED         // let the system release the handle when it's no longer used
+    //    ));
+
+    //    wc.hIcon = icon;
+    //    wc.hIconSm = icon;
+    //}
+
+    if (!RegisterClassEx(&winClass)) {
+        MessageBox(NULL, L"Cannot register the win32 class!", L"Framework Error", MB_OK | MB_ICONERROR);
         return;
-    }
+    };
 
+    RECT initialRect = { 0, 0, width, height };
+    AdjustWindowRectEx(&initialRect, WS_OVERLAPPEDWINDOW, FALSE, WS_EX_OVERLAPPEDWINDOW);
+    LONG initialWidth = initialRect.right - initialRect.left;
+    LONG initialHeight = initialRect.bottom - initialRect.top;
 
-    DWORD style = (WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX);
-    if (data.resizable) {
-        style = style | WS_THICKFRAME | WS_MAXIMIZEBOX;
-    }
     hWnd = CreateWindowEx(
-        0,                              // Optional window styles.
-        CLASS_NAME,                     // Window class
-        DX::to_wstring(title).c_str(),    // Window text
-        style,            // Window style
+        NULL,
+        winClass.lpszClassName,
+        DX::to_wstring(title).c_str(),
+        (!data.resizable) ? WS_OVERLAPPEDWINDOW ^ WS_MAXIMIZEBOX ^ WS_THICKFRAME : WS_OVERLAPPEDWINDOW,    // window style
+        300,    // x-position of the window
+        300,    // y-position of the window 
+        initialWidth,    // width of the window
+        initialHeight,    // height of the window
+        NULL,    // we have no parent window, NULL
+        NULL,    // we aren't using menus, NULL
+        hInstance,    // application handle
+        NULL);    // used with multiple windows, NULL)
 
-        // Size and position
-        CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
-
-        NULL,       // Parent window    
-        NULL,       // Menu
-        hInstance,  // Instance handle
-        NULL        // Additional application data
-    );
     if (hWnd == NULL) {
-        MessageBox(NULL, L"Cannot create the window!", L"Framework Window Class", MB_OK | MB_ICONERROR);
+        MessageBox(NULL, L"Cannot create the window!", L"Framework Error", MB_OK | MB_ICONERROR);
         return;
     }
+
     ShowWindow(hWnd, SW_SHOW);
-    UpdateWindow(hWnd);
 }
 
 DX::Window::~Window()
@@ -73,12 +73,12 @@ DX::Window::~Window()
 
 bool DX::Window::IsOpen()
 {
-    return msg.message != WM_QUIT;
+    return (msg.message != WM_QUIT);
 }
 
 void DX::Window::PoolEvents()
 {
-    if (PeekMessage(&msg, NULL, 0U, 0U, PM_REMOVE)) {
+    if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
         TranslateMessage(&msg);
         DispatchMessage(&msg);
     }

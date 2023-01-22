@@ -1,6 +1,7 @@
 #pragma once
 
-#define FULLSCREEN_KEY	GLFW_KEY_F11
+#define FULLSCREEN_KEY 
 
 #define APP_NAME "Playground Tests"
-#define APP_VERSION "0.0.2_alpha"
+#define APP_VERSION_STR "0.0.2_alpha"
+#define APP_VERSION 0x0000002

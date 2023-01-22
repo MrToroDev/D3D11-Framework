@@ -296,6 +296,8 @@ Application::Application(HINSTANCE hInstance)
 #endif
 		data->assetManager.InitResources("Assets/Data.json");
 		srand((unsigned)time(NULL));
+
+		data->timer.Start();
 	}
 	catch (DX::com_exception e) {
 		MessageBox(data->window->GetHandle(), DX::toWchar(e.what()), L"ERROR", MB_OK | MB_ICONERROR);
@@ -316,12 +318,12 @@ Application::~Application()
 
 	data->D3Dgraphic->ClearStateFlush();
 
-	DX::LogInfo("Destroying Window...");
-	delete data->window;
 	DX::LogInfo("Shutting Down ImGui...");
 	ImGui_ImplWin32_Shutdown();
 	ImGui_ImplDX11_Shutdown();
 	ImGui::DestroyContext();
+	DX::LogInfo("Destroying Window...");
+	delete data->window;
 	DX::LogInfo("Destroying State objects...");
 	data->STmachine.GetActiveState()->destroy();
 	DX::LogInfo("Destroying Graphics...");
@@ -349,8 +351,11 @@ void Application::update()
 	HandleDebugMessage();
 #endif
 
-	// TODO: Make deltatime function
-	if (/*dt >= 1.0f / data->FrameLimit*/true) {
+	dt = data->timer.GetMilisecondsElapsed();
+	data->timer.Restart();
+	OutputDebugStringA(std::to_string(dt).append("\n").c_str());
+
+	if (dt / 10.0f >= 1.0f / data->FrameLimit) {
 		data->FPS = 1.0f / dt;
 		// Fix the cpu time to 2 decimal precision
 		float value = (int)((dt * 1000) * 100 + .5);
@@ -363,8 +368,7 @@ void Application::update()
 
 void Application::draw()
 {
-	// TODO: Make deltatime function
-	if (/*dt >= 1.0f / data->FrameLimit*/true) {
+	if (dt >= 1.0f / data->FrameLimit) {
 		auto startTime = std::chrono::high_resolution_clock::now();
 		float color[] = { 0, 0, 0, 1.0 };
 		data->D3Dgraphic->Clear(color);

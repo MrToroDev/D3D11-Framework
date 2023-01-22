@@ -172,6 +172,7 @@
     <ClCompile Include="Physics\RigidStatic.cpp" />
     <ClCompile Include="System\AssetManager.cpp" />
     <ClCompile Include="System\Math.cpp" />
+    <ClCompile Include="System\Timer.cpp" />
     <ClCompile Include="Utils\StateMachine.cpp" />
     <ClCompile Include="Utils\Utils.cpp" />
     <ClCompile Include="Window\Graphic.cpp" />
@@ -201,6 +202,7 @@
     <ClInclude Include="System\AssetManager.h" />
     <ClInclude Include="System\Config.h" />
     <ClInclude Include="System\Math.h" />
+    <ClInclude Include="System\Timer.h" />
     <ClInclude Include="Utils\StateMachine.h" />
     <ClInclude Include="Utils\States.h" />
     <ClInclude Include="Utils\Utils.h" />

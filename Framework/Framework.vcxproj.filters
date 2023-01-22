@@ -107,6 +107,9 @@
     <ClCompile Include="..\lib source\imgui_impl_win32.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
+    <ClCompile Include="System\Timer.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Audio\Listener.h">
@@ -191,6 +194,9 @@
       <Filter>File di intestazione</Filter>
     </ClInclude>
     <ClInclude Include="Components\Transform.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="System\Timer.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
   </ItemGroup>

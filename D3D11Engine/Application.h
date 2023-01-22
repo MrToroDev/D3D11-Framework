@@ -4,6 +4,7 @@
 #include <Window/Window.h>
 #include <Window/Graphic.h>
 #include <System/AssetManager.h>
+#include <System\Timer.h>
 #include <Utils/StateMachine.h>
 #include <Console.h>
 #include <Logger.h>
@@ -24,6 +25,7 @@ struct ApplicationData
 	DX::StateMachine STmachine;
 	DX::Console debugConsole;
 	DX::AssetManager assetManager;
+	DX::Timer timer;
 
 	PhysicWorld physicWorld;
 	

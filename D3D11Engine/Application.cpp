@@ -226,8 +226,7 @@ void Application::InitImgui()
 
 	style->ScrollbarSize = 20;
 	style->ScrollbarRounding = 0;
-
-	ImGui_ImplWin32_Init(data->window->GetHandle());
+	ImGui_ImplGlfw_InitForOther(data->window->GetWindow(), true);
 	ImGui_ImplDX11_Init(data->D3Dgraphic->getDevice().Get(), data->D3Dgraphic->getDeviceContext().Get());
 
 	DX::LogInfo("ImGui Initialized!");
@@ -371,8 +370,8 @@ void Application::draw()
 	if (dt >= 1.0f / data->FrameLimit) {
 		auto startTime = std::chrono::high_resolution_clock::now();
 		float color[] = { 0, 0, 0, 1.0 };
-		data->D3Dgraphic->Clear(color);
 		data->D3Dgraphic->SetRenderTarget();
+		data->D3Dgraphic->Clear(color);
 		data->D3Dgraphic->UpdateSwapChain();
 		data->D3Dgraphic->SetViewport(data->window->GetWidth(), data->window->GetHeight(), 0, 0);
 		ImGui_ImplDX11_NewFrame();

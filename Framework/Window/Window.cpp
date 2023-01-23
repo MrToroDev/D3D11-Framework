@@ -1,5 +1,6 @@
 #include "Window.h"
 #include "../Utils/Utils.h"
+#include <cassert>
 
 int DX::Window::width = 0;
 int DX::Window::height = 0;
@@ -63,10 +64,28 @@ DX::Window::Window(HINSTANCE hInstance, const char* title, int width, int height
     }
 
     ShowWindow(hWnd, SW_SHOW);
+
+    // ------------------------Direct Input Init------------------------
+    m_mouseX = 0;
+    m_mouseY = 0;
+    assert(SUCCEEDED(DirectInput8Create(hInstance, DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&m_directInput, NULL)));
+    assert(SUCCEEDED(m_directInput->CreateDevice(GUID_SysKeyboard, &m_keyboard, NULL)));
+    assert(SUCCEEDED(m_keyboard->SetDataFormat(&c_dfDIKeyboard)));
+    m_keyboard->Acquire();
+    assert(SUCCEEDED(m_directInput->CreateDevice(GUID_SysMouse, &m_mouse, NULL)));
+    assert(SUCCEEDED(m_mouse->SetDataFormat(&c_dfDIMouse)));
+    assert(SUCCEEDED(m_mouse->SetCooperativeLevel(hWnd, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE)));
+    m_mouse->Acquire();
 }
 
 DX::Window::~Window()
 {
+    m_mouse->Unacquire();
+    m_mouse->Release();
+    m_keyboard->Unacquire();
+    m_keyboard->Release();
+    m_directInput->Release();
+
     DestroyWindow(hWnd);
     UnregisterClass(L"_FRAMEWORK_WINDOW_CLASS", _instance);
 }
@@ -82,6 +101,39 @@ void DX::Window::PoolEvents()
         TranslateMessage(&msg);
         DispatchMessage(&msg);
     }
+
+    HRESULT result;
+    // Read the keyboard device.
+    result = m_keyboard->GetDeviceState(sizeof(m_keyboardState), (LPVOID)&m_keyboardState);
+    if (FAILED(result))
+    {
+        // If the keyboard lost focus or was not acquired then try to get control back.
+        if ((result == DIERR_INPUTLOST) || (result == DIERR_NOTACQUIRED))
+        {
+            m_keyboard->Acquire();
+        }
+    }
+
+    result = m_mouse->GetDeviceState(sizeof(DIMOUSESTATE), (LPVOID)&m_mouseState);
+    if (FAILED(result))
+    {
+        // If the mouse lost focus or was not acquired then try to get control back.
+        if ((result == DIERR_INPUTLOST) || (result == DIERR_NOTACQUIRED))
+        {
+            m_mouse->Acquire();
+        }
+    }
+
+    // Update the location of the mouse cursor based on the change of the mouse location during the frame.
+    m_mouseX += m_mouseState.lX;
+    m_mouseY += m_mouseState.lY;
+
+    // Ensure the mouse location doesn't exceed the screen width or height.
+    if (m_mouseX < 0) { m_mouseX = 0; }
+    if (m_mouseY < 0) { m_mouseY = 0; }
+
+    if (m_mouseX > width) { m_mouseX = width; }
+    if (m_mouseY > height) { m_mouseY = height; }
 }
 
 HWND DX::Window::GetHandle()
@@ -97,6 +149,23 @@ int DX::Window::GetWidth()
 int DX::Window::GetHeight()
 {
     return height;
+}
+
+void DX::Window::GetMousePosition(int& mouseX, int& mouseY)
+{
+    mouseX = m_mouseX;
+    mouseY = m_mouseY;
+}
+
+bool DX::Window::IsKeyPressed(unsigned int IDkey)
+{
+    // Do a bitwise and on the keyboard state to check if the escape key is currently being pressed.
+    if (m_keyboardState[IDkey] & 0x80)
+    {
+        return true;
+    }
+
+    return false;
 }
 
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);

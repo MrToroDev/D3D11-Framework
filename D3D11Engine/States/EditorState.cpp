@@ -31,77 +31,40 @@ void EditorState::init()
 		0, 1, 2
 	};
 
-	std::vector<DX::VertexTexture> cube_v = {
-		// Front Face
-			DX::VertexTexture(-1.0f, -1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f),
-			DX::VertexTexture(-1.0f,  1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f),
-			DX::VertexTexture(1.0f,  1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f),
-			DX::VertexTexture(1.0f, -1.0f, -1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f),
-
-			// Back Face
-			DX::VertexTexture(-1.0f, -1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f),
-			DX::VertexTexture(1.0f, -1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f),
-			DX::VertexTexture(1.0f,  1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f),
-			DX::VertexTexture(-1.0f,  1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f),
-
-			// Top Face
-			DX::VertexTexture(-1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f),
-			DX::VertexTexture(-1.0f, 1.0f,  1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f),
-			DX::VertexTexture(1.0f, 1.0f,  1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f),
-			DX::VertexTexture(1.0f, 1.0f, -1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f),
-
-			// Bottom Face
-			DX::VertexTexture(-1.0f, -1.0f, -1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f),
-			DX::VertexTexture(1.0f, -1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f),
-			DX::VertexTexture(1.0f, -1.0f,  1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f),
-			DX::VertexTexture(-1.0f, -1.0f,  1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f),
-
-			// Left Face
-			DX::VertexTexture(-1.0f, -1.0f,  1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f),
-			DX::VertexTexture(-1.0f,  1.0f,  1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f),
-			DX::VertexTexture(-1.0f,  1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f),
-			DX::VertexTexture(-1.0f, -1.0f, -1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f),
-
-			// Right Face
-			DX::VertexTexture(1.0f, -1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f),
-			DX::VertexTexture(1.0f,  1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f),
-			DX::VertexTexture(1.0f,  1.0f,  1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f),
-			DX::VertexTexture(1.0f, -1.0f,  1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f),
-	};
-
-	std::vector<int> cube_i = {
-			// Front Face
-			0,  1,  2,
-			0,  2,  3,
-
-			// Back Face
-			4,  5,  6,
-			4,  6,  7,
-
-			// Top Face
-			8,  9, 10,
-			8, 10, 11,
-
-			// Bottom Face
-			12, 13, 14,
-			12, 14, 15,
-
-			// Left Face
-			16, 17, 18,
-			16, 18, 19,
-
-			// Right Face
-			20, 21, 22,
-			20, 22, 23
-	};
 	cbuffer_Cube.Initialize(_data->D3Dgraphic->getDevice().Get());
-
 	auto test = DX::LoadMeshFile("Assets/Models/Cube.mesh");
-
 	mesh_test = new DX::Mesh(_data->D3Dgraphic->getDevice(), DX::to_wstring(_data->assetManager.GetShader("cube")), "PSMain", "VSMain", test.vertices, test.indices);
 }
 void EditorState::update(float dt)
 {
+	float speed = 20;
+	if (_data->window->IsKeyPressed(DIK_W)) {
+		camera.AdjustPosition(camera.GetForwardVector() * dt * speed);
+	}
+	if (_data->window->IsKeyPressed(DIK_S)) {
+		camera.AdjustPosition(camera.GetBackwardVector() * dt * speed);
+	}
+	if (_data->window->IsKeyPressed(DIK_A)) {
+		camera.AdjustPosition(camera.GetLeftVector() * dt * speed);
+	}
+	if (_data->window->IsKeyPressed(DIK_D)) {
+		camera.AdjustPosition(camera.GetRightVector() * dt * speed);
+	}
+
+	if (_data->window->IsKeyPressed(DIK_LEFT)) {
+		camera.AdjustRotation(0, -1 * dt * 0.3, 0);
+	}
+	if (_data->window->IsKeyPressed(DIK_RIGHT)) {
+		camera.AdjustRotation(0, 1 * dt * 0.3, 0);
+	}
+
+	// TODO: NEED FIX
+	/*int x, y;
+	_data->window->GetMousePosition(x, y);
+	x *= 0.1;
+	y *= 0.1;
+	camera.SetRotation(y, x, 0);*/
+
 
 	_renderTarget->SetConstantBufferData(_data->D3Dgraphic->getDeviceContext(), false, 1.0f, 2.1f, false, 128, dt);
 
@@ -124,18 +87,28 @@ void EditorState::update(float dt)
 
 void EditorState::draw()
 {
-	if (showEditor) {
-		// Create Predefined ImGui Window
-		int windowFlag = ImGuiWindowFlags_::ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_MenuBar;
-		ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
-		ImGui::SetNextWindowSize(ImVec2((float)_data->window->GetWidth(), (float)_data->window->GetHeight()));
-		ImGui::PushStyleVar(ImGuiStyleVar_::ImGuiStyleVar_WindowRounding, 0.0f);
-		ImGui::PushStyleVar(ImGuiStyleVar_::ImGuiStyleVar_WindowBorderSize, 0.0f);
-		windowFlag |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize
-			| ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus
-			| ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoScrollbar;
-		ImGui::Begin("mainDockSpace", (bool*)0, windowFlag);
 
+	_data->D3Dgraphic->UnBoundRenderTarget();
+	float color[4] = { 0, 0, 1, 1 };
+	_renderTarget->Clear(_data->D3Dgraphic->getDeviceContext(), color);
+	_renderTarget->SetRenderTarget(_data->D3Dgraphic->getDevice(), _data->D3Dgraphic->getDeviceContext(), _data->window->GetWidth(), _data->window->GetHeight());
+
+	mesh_test->prepareDraw(_data->D3Dgraphic->getDeviceContext());
+	cbuffer_Cube.Bind(_data->D3Dgraphic->getDeviceContext().Get(), 0, DX::ConstantBuffer_BindType::VertexShader);
+	mesh_test->Draw(_data->D3Dgraphic->getDeviceContext(), 36);
+
+	spriteBatch->Begin();
+	std::stringstream ss;
+	ss << (int)_data->FPS << " FPS" << std::endl << _data->CPU_TIME << " ms";
+
+	spriteFont->DrawString(spriteBatch, ss.str().c_str(), DirectX::XMFLOAT2(0, 0), DirectX::Colors::White, 0.0f, DirectX::XMFLOAT2(0, 0), 2);
+	spriteBatch->End();
+
+	_renderTarget->UnBoundTarget(_data->D3Dgraphic->getDeviceContext());
+
+	_data->D3Dgraphic->SetRenderTarget();
+	
+	if (showEditor) {
 		if (ImGui::BeginMainMenuBar())
 		{
 			if (ImGui::BeginMenu("Utils")) {
@@ -149,32 +122,6 @@ void EditorState::draw()
 			ImGui::EndMainMenuBar();
 		}
 
-		ImGui::PopStyleVar(2);
-		ImGui::End();
-	}
-
-	_data->D3Dgraphic->UnBoundRenderTarget();
-
-	float color[4] = { 0, 0, 1, 1 };
-	_renderTarget->Clear(_data->D3Dgraphic->getDeviceContext(), color);
-	_renderTarget->SetRenderTarget(_data->D3Dgraphic->getDevice(), _data->D3Dgraphic->getDeviceContext(), _data->window->GetWidth(), _data->window->GetHeight());
-
-	spriteBatch->Begin();
-	std::stringstream ss;
-	ss << (int)_data->FPS << " FPS" << std::endl << _data->CPU_TIME << " ms";
-
-	spriteFont->DrawString(spriteBatch, ss.str().c_str(), DirectX::XMFLOAT2(0, 0), DirectX::Colors::White, 0.0f, DirectX::XMFLOAT2(0, 0), 2);
-	spriteBatch->End();
-
-	mesh_test->prepareDraw(_data->D3Dgraphic->getDeviceContext());
-	cbuffer_Cube.Bind(_data->D3Dgraphic->getDeviceContext().Get(), 0, DX::ConstantBuffer_BindType::VertexShader);
-	mesh_test->Draw(_data->D3Dgraphic->getDeviceContext(), 36);
-
-	_renderTarget->UnBoundTarget(_data->D3Dgraphic->getDeviceContext());
-
-	_data->D3Dgraphic->SetRenderTarget();
-	
-	if (showEditor) {
 		int flags = ImGuiWindowFlags_::ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_::ImGuiWindowFlags_NoScrollWithMouse;
 		ImGui::Begin("Viewport", (bool*)0, flags);
 		ImGui::Image((ImTextureID)_renderTarget->GetTextureSRV().Get(), ImVec2(ImGui::GetWindowWidth(), ImGui::GetWindowHeight() - 35));
@@ -184,7 +131,14 @@ void EditorState::draw()
 		ImGui::SliderFloat("Cube X", &tX, 0, 360);
 		ImGui::SliderFloat("Cube Y", &tY, 0, 360);
 		ImGui::SliderFloat("Cube Z", &tZ, 0, 360);
-		ImGui::End();
+
+		ss.clear();
+		int mx, my;
+		_data->window->GetMousePosition(mx, my);
+		ss << "Mouse X: " << mx << std::endl
+			<< "Mouse Y: " << my;
+		ImGui::Text(ss.str().c_str());
+		ImGui::End();		
 	}
 
 	int wFlags = ImGuiWindowFlags_::ImGuiWindowFlags_NoDocking;

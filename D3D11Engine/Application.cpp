@@ -226,7 +226,7 @@ void Application::InitImgui()
 
 	style->ScrollbarSize = 20;
 	style->ScrollbarRounding = 0;
-	ImGui_ImplGlfw_InitForOther(data->window->GetWindow(), true);
+	ImGui_ImplWin32_Init(data->window->GetHandle());
 	ImGui_ImplDX11_Init(data->D3Dgraphic->getDevice().Get(), data->D3Dgraphic->getDeviceContext().Get());
 
 	DX::LogInfo("ImGui Initialized!");
@@ -352,9 +352,8 @@ void Application::update()
 
 	dt = data->timer.GetMilisecondsElapsed();
 	data->timer.Restart();
-	OutputDebugStringA(std::to_string(dt).append("\n").c_str());
 
-	if (dt / 10.0f >= 1.0f / data->FrameLimit) {
+	if (dt >= 1.0f / data->FrameLimit) {
 		data->FPS = 1.0f / dt;
 		// Fix the cpu time to 2 decimal precision
 		float value = (int)((dt * 1000) * 100 + .5);
@@ -367,7 +366,7 @@ void Application::update()
 
 void Application::draw()
 {
-	if (dt >= 1.0f / data->FrameLimit) {
+	if (1.0f / dt >= 1.0f / data->FrameLimit) {
 		auto startTime = std::chrono::high_resolution_clock::now();
 		float color[] = { 0, 0, 0, 1.0 };
 		data->D3Dgraphic->SetRenderTarget();

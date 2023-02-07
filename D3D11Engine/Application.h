@@ -4,12 +4,10 @@
 #include <Window/Window.h>
 #include <Window/Graphic.h>
 #include <System/AssetManager.h>
-#include <System\Timer.h>
 #include <Utils/StateMachine.h>
 #include <Console.h>
 #include <Logger.h>
 #include <iostream>
-#include <dxgidebug.h>
 #include <memory>
 #include <nlohmann/json.hpp>
 #include "Physics.h"
@@ -25,7 +23,6 @@ struct ApplicationData
 	DX::StateMachine STmachine;
 	DX::Console debugConsole;
 	DX::AssetManager assetManager;
-	DX::Timer timer;
 
 	PhysicWorld physicWorld;
 	
@@ -48,19 +45,16 @@ typedef std::shared_ptr<ApplicationData> ApplicationDataRef;
 class Application
 {
 private:
-	Microsoft::WRL::ComPtr<ID3D11Debug> debuglayer = nullptr;
-	Microsoft::WRL::ComPtr<ID3D11InfoQueue> debugInfo = nullptr;
-	Microsoft::WRL::ComPtr<IDXGIInfoQueue> dxgiDebugInfo = nullptr;
-	
 	ApplicationDataRef data = std::make_shared<ApplicationData>();
-	float dt, lasttime = 0;
+	float dt;
+	bool opened = true;
+	uint64_t lastCount, currentCount, frequency;
 	ImGuiIO* io;
 
 	void InitWinGraphic(HINSTANCE hinstance);
 	void InitImgui();
 	void InitConfig();
-	void HandleDebugMessage();
-
+	
 public:
 	Application(HINSTANCE hInstance);
 	~Application();

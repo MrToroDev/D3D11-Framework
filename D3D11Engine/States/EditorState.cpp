@@ -35,6 +35,7 @@ void EditorState::init()
 	auto test = DX::LoadMeshFile("Assets/Models/Cube.mesh");
 	mesh_test = new DX::Mesh(_data->D3Dgraphic->getDevice(), DX::to_wstring(_data->assetManager.GetShader("cube")), "PSMain", "VSMain", test.vertices, test.indices);
 }
+
 void EditorState::update(float dt)
 {
 	float speed = 20;
@@ -57,14 +58,6 @@ void EditorState::update(float dt)
 	if (_data->window->IsKeyPressed(DIK_RIGHT)) {
 		camera.AdjustRotation(0, 1 * dt * 0.3, 0);
 	}
-
-	// TODO: NEED FIX
-	/*int x, y;
-	_data->window->GetMousePosition(x, y);
-	x *= 0.1;
-	y *= 0.1;
-	camera.SetRotation(y, x, 0);*/
-
 
 	_renderTarget->SetConstantBufferData(_data->D3Dgraphic->getDeviceContext(), false, 1.0f, 2.1f, false, 128, dt);
 
@@ -99,7 +92,8 @@ void EditorState::draw()
 
 	spriteBatch->Begin();
 	std::stringstream ss;
-	ss << (int)_data->FPS << " FPS" << std::endl << _data->CPU_TIME << " ms";
+	ss << (int)_data->FPS << " FPS"
+		<< std::endl << _data->CPU_TIME << " ms";
 
 	spriteFont->DrawString(spriteBatch, ss.str().c_str(), DirectX::XMFLOAT2(0, 0), DirectX::Colors::White, 0.0f, DirectX::XMFLOAT2(0, 0), 2);
 	spriteBatch->End();
@@ -108,20 +102,20 @@ void EditorState::draw()
 
 	_data->D3Dgraphic->SetRenderTarget();
 	
-	if (showEditor) {
-		if (ImGui::BeginMainMenuBar())
-		{
-			if (ImGui::BeginMenu("Utils")) {
-				if (ImGui::Button("Reload Shaders", ImVec2(100, 30))) {
-					this->destroy();
-					this->init();
-				}
-				ImGui::EndMenu();
+	if (ImGui::BeginMainMenuBar())
+	{
+		if (ImGui::BeginMenu("Utils")) {
+			if (ImGui::Button("Reload Shaders", ImVec2(100, 30))) {
+				this->destroy();
+				this->init();
 			}
-
-			ImGui::EndMainMenuBar();
+			ImGui::EndMenu();
 		}
 
+		ImGui::EndMainMenuBar();
+	}
+
+	if (showEditor) {
 		int flags = ImGuiWindowFlags_::ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_::ImGuiWindowFlags_NoScrollWithMouse;
 		ImGui::Begin("Viewport", (bool*)0, flags);
 		ImGui::Image((ImTextureID)_renderTarget->GetTextureSRV().Get(), ImVec2(ImGui::GetWindowWidth(), ImGui::GetWindowHeight() - 35));

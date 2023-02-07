@@ -1,6 +1,6 @@
 #pragma once
 
-#define FULLSCREEN_KEY 
+//#define _SILENCE_CXX20_CISO646_REMOVED_WARNING
 
 #define APP_NAME "Playground Tests"
 #define APP_VERSION_STR "0.0.2_alpha"

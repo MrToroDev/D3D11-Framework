@@ -127,9 +127,14 @@ Application::Application(HINSTANCE hInstance)
 		data->assetManager.InitResources("Assets/Data.json");
 		srand((unsigned)time(NULL));
 <<<<<<< HEAD
+<<<<<<< HEAD
 		data->TimeStep = 1.0f;
 		QueryPerformanceCounter(&start_time);
 		QueryPerformanceFrequency(&frequency);
+=======
+		QueryPerformanceCounter((LARGE_INTEGER*)&lastCount);
+		QueryPerformanceFrequency((LARGE_INTEGER*)&frequency);
+>>>>>>> 9c80a885c9db45016df07b61bda58a717cd97caf
 =======
 		QueryPerformanceCounter((LARGE_INTEGER*)&lastCount);
 		QueryPerformanceFrequency((LARGE_INTEGER*)&frequency);
@@ -178,6 +183,7 @@ void Application::update()
 	data->STmachine.ProcessChanges();
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 	QueryPerformanceCounter(&end_time);
 	dt = (end_time.QuadPart - start_time.QuadPart) * (1.0f / frequency.QuadPart);
 
@@ -185,6 +191,8 @@ void Application::update()
 		start_time = end_time;
 		data->FPS = 1.f / dt;
 =======
+=======
+>>>>>>> 9c80a885c9db45016df07b61bda58a717cd97caf
 	QueryPerformanceCounter((LARGE_INTEGER*)&currentCount);
 
 	dt = static_cast<float>((currentCount - lastCount) * (1.0f / frequency));
@@ -208,7 +216,13 @@ void Application::update()
 void Application::draw()
 {
 <<<<<<< HEAD
+<<<<<<< HEAD
 	if (dt >= 1.f / data->FrameLimit) {
+=======
+	if (dt >= 1.0f / data->FrameLimit) {
+		io->DisplaySize = ImVec2((float)data->window->GetWidth(), (float)data->window->GetHeight());
+
+>>>>>>> 9c80a885c9db45016df07b61bda58a717cd97caf
 =======
 	if (dt >= 1.0f / data->FrameLimit) {
 		io->DisplaySize = ImVec2((float)data->window->GetWidth(), (float)data->window->GetHeight());
@@ -230,14 +244,20 @@ void Application::draw()
 		data->STmachine.GetActiveState()->draw();
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 		ImGui::EndFrame();
 =======
+=======
+>>>>>>> 9c80a885c9db45016df07b61bda58a717cd97caf
 		ImGui::Begin("ff", &opened);
 		ImGui::Text("%f", dt);
 		ImGui::End();
 
 		ImGui::EndFrame();
 
+<<<<<<< HEAD
+>>>>>>> 9c80a885c9db45016df07b61bda58a717cd97caf
+=======
 >>>>>>> 9c80a885c9db45016df07b61bda58a717cd97caf
 		ImGui::Render();
 		ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());

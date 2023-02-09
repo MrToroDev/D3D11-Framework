@@ -1,6 +1,6 @@
+#include "Application.h"
 #include <Windows.h>
 #include <System/Config.h>
-#include "Application.h"
 #include <COMException.h>
 #include <Utils/Utils.h>
 

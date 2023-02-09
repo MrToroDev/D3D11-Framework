@@ -2,7 +2,11 @@
 #include "../Logger.h"
 #include "../COMException.h"
 <<<<<<< HEAD
+<<<<<<< HEAD
 #include "../Memory.h"
+=======
+#include "../Logger.h"
+>>>>>>> 9c80a885c9db45016df07b61bda58a717cd97caf
 =======
 #include "../Logger.h"
 >>>>>>> 9c80a885c9db45016df07b61bda58a717cd97caf
@@ -65,7 +69,11 @@ void Graphic::CreateSwapChain()
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 void DX::Graphic::HandleDebugLayerMessages()
+=======
+void DX::Graphic::DebugLayer()
+>>>>>>> 9c80a885c9db45016df07b61bda58a717cd97caf
 =======
 void DX::Graphic::DebugLayer()
 >>>>>>> 9c80a885c9db45016df07b61bda58a717cd97caf
@@ -325,7 +333,10 @@ Graphic::Graphic(Window* win, bool fullscreen)
 
 #if defined(_DEBUG)
 <<<<<<< HEAD
+<<<<<<< HEAD
     // Create Debug Layer
+=======
+>>>>>>> 9c80a885c9db45016df07b61bda58a717cd97caf
 =======
 >>>>>>> 9c80a885c9db45016df07b61bda58a717cd97caf
     DX_CHECK(dev.As(&debuglayer));
@@ -431,10 +442,15 @@ void Graphic::Present(int vsync)
     while (devcon->GetData(disjoinQuery.Get(), nullptr, 0, 0) == S_FALSE) { Sleep(1); }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 #if defined(_DEBUG)
     // Handle debug messages every frame to know if something goes wrong
     HandleDebugLayerMessages();
 #endif
+=======
+    DebugLayer();
+
+>>>>>>> 9c80a885c9db45016df07b61bda58a717cd97caf
 =======
     DebugLayer();
 

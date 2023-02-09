@@ -113,31 +113,28 @@ void EditorState::draw()
 	cbuffer_Cube.Bind(_data->D3Dgraphic->getDeviceContext().Get(), 0, DX::ConstantBuffer_BindType::VertexShader);
 	mesh_test->Draw(_data->D3Dgraphic->getDeviceContext(), 36);
 
-	billboard->prepareDraw(_data->D3Dgraphic->getDeviceContext());
-	cbuffer_Cube2.Bind(_data->D3Dgraphic->getDeviceContext().Get(), 0, DX::ConstantBuffer_BindType::VertexShader);
-	sampler->Bind(_data->D3Dgraphic->getDeviceContext(), 0);
-	billboard_texture->Bind(_data->D3Dgraphic->getDeviceContext(), 0);
-	billboard->Draw(_data->D3Dgraphic->getDeviceContext(), 4);
-	
+	spriteBatch->Begin();
+	std::stringstream ss;
+	ss << (int)_data->FPS << " FPS"
+		<< std::endl << _data->CPU_TIME << " ms";
+
+	spriteFont->DrawString(spriteBatch, ss.str().c_str(), DirectX::XMFLOAT2(0, 0), DirectX::Colors::White, 0.0f, DirectX::XMFLOAT2(0, 0), 2);
+	spriteBatch->End();
+
 	_renderTarget->UnBoundTarget(_data->D3Dgraphic->getDeviceContext());
 
 	_data->D3Dgraphic->SetRenderTarget();
 	
-	if (ImGui::BeginMainMenuBar())
-	{
-		if (ImGui::BeginMenu("Utils")) {
-			if (ImGui::Button("Reload Shaders", ImVec2(100, 30))) {
-				this->destroy();
-				this->init();
+	if (showEditor) {
+		if (ImGui::BeginMainMenuBar())
+		{
+			if (ImGui::BeginMenu("Utils")) {
+				if (ImGui::Button("Reload Shaders", ImVec2(100, 30))) {
+					this->destroy();
+					this->init();
+				}
+				ImGui::EndMenu();
 			}
-			ImGui::EndMenu();
-		}
-
-		if (ImGui::BeginMenu("Settings")) {
-			ImGui::SliderFloat("FPS", &_data->FrameLimit, 15, 244);
-
-			ImGui::EndMenu();
-		}
 
 		ImGui::EndMainMenuBar();
 	}
@@ -207,9 +204,4 @@ void EditorState::destroy()
 	delete spriteBatch;
 	delete spriteFont;
 	delete _renderTarget;
-	delete sampler;
-	delete plane;
-	delete mesh_test;
-	delete billboard;
-	delete billboard_texture;
 }

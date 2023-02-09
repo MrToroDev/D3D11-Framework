@@ -1,1 +1,5 @@
+<<<<<<< HEAD
 {"Graphic":{"fpsLimit":60.0,"vsync":false},"Window":{"fullscreen":false,"height":533,"width":834}}
+=======
+{"Graphic":{"fpsLimit":244.0,"vsync":false},"Window":{"fullscreen":false,"height":529,"width":830}}
+>>>>>>> 9c80a885c9db45016df07b61bda58a717cd97caf

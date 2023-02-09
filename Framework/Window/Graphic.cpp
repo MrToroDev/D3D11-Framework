@@ -1,7 +1,11 @@
 #include "Graphic.h"
 #include "../Logger.h"
 #include "../COMException.h"
+<<<<<<< HEAD
 #include "../Memory.h"
+=======
+#include "../Logger.h"
+>>>>>>> 9c80a885c9db45016df07b61bda58a717cd97caf
 #include <string>
 #include <sstream>
 #include <assert.h>
@@ -60,7 +64,11 @@ void Graphic::CreateSwapChain()
     backBufferTexture->Release();
 }
 
+<<<<<<< HEAD
 void DX::Graphic::HandleDebugLayerMessages()
+=======
+void DX::Graphic::DebugLayer()
+>>>>>>> 9c80a885c9db45016df07b61bda58a717cd97caf
 {
     {
         UINT64 messages = debugInfo->GetNumStoredMessages();
@@ -316,7 +324,10 @@ Graphic::Graphic(Window* win, bool fullscreen)
     swapchain->SetFullscreenState(fullscreen, nullptr);
 
 #if defined(_DEBUG)
+<<<<<<< HEAD
     // Create Debug Layer
+=======
+>>>>>>> 9c80a885c9db45016df07b61bda58a717cd97caf
     DX_CHECK(dev.As(&debuglayer));
     assert(debuglayer);
     DX_CHECK(debuglayer.As(&debugInfo));
@@ -419,10 +430,15 @@ void Graphic::Present(int vsync)
     devcon->End(disjoinQuery.Get());
     while (devcon->GetData(disjoinQuery.Get(), nullptr, 0, 0) == S_FALSE) { Sleep(1); }
 
+<<<<<<< HEAD
 #if defined(_DEBUG)
     // Handle debug messages every frame to know if something goes wrong
     HandleDebugLayerMessages();
 #endif
+=======
+    DebugLayer();
+
+>>>>>>> 9c80a885c9db45016df07b61bda58a717cd97caf
 }
 
 void Graphic::SetViewport(int width, int height, int x, int y)

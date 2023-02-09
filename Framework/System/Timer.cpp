@@ -8,16 +8,16 @@ Timer::Timer()
 	stop = std::chrono::high_resolution_clock::now();
 }
 
-double Timer::GetMilisecondsElapsed()
+float Timer::GetMilisecondsElapsed()
 {
 	if (isrunning)
 	{
-		auto elapsed = std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - start);
+		auto elapsed = std::chrono::duration<float>(std::chrono::high_resolution_clock::now() - start);
 		return elapsed.count();
 	}
 	else
 	{
-		auto elapsed = std::chrono::duration<double>(stop - start);
+		auto elapsed = std::chrono::duration<float>(stop - start);
 		return elapsed.count();
 	}
 }

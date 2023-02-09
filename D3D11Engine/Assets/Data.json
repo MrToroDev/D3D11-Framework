@@ -1,10 +1,13 @@
 {
   "shaders": {
 	"triangle": "Assets/Shaders/Triangle.hlsl",
+	"billboard": "Assets/Shaders/Billboard.hlsl",
 	"cube": "Assets/Shaders/Object3D.hlsl",
 	"renderTarget": "Assets/Shaders/RenderTarget.hlsl"
   },
-  "textures": {},
+  "textures": {
+	"dximage": "Assets/Gfx/dxImage.jpg"
+  },
   "fonts": {
 	"consola": "Assets/Fonts/consola_font.sprite"
   },

@@ -1,5 +1,6 @@
 #pragma once
 #include <d3d11_2.h>
+#include <dxgidebug.h>
 #include <wrl.h>
 #include "Window.h"
 
@@ -25,10 +26,16 @@ namespace DX
 		ComPtr<ID3D11Query> endQuery = nullptr;
 		ComPtr<ID3D11Query> disjoinQuery = nullptr;
 		ComPtr<ID3D11RenderTargetView> backbuffer = nullptr;    // the pointer to our back buffer
-
+#if defined(_DEBUG)
+		ComPtr<ID3D11Debug> debuglayer = nullptr;
+		ComPtr<ID3D11InfoQueue> debugInfo = nullptr;
+		ComPtr<IDXGIInfoQueue> dxgiDebugInfo = nullptr;
+#endif
 
 		void CreateDepthStencilBuffer(int width, int height);
 		void CreateSwapChain();
+
+		void HandleDebugLayerMessages();
 
 	public:
 		Graphic(Window* win, bool fullscreen);

@@ -13,7 +13,7 @@ struct PSInput
 
 cbuffer CameraData : register(b0)
 {
-    row_major matrix worldPos;
+    matrix worldPos;
     matrix projection;
     matrix view;
     vector position;

@@ -17,9 +17,11 @@ namespace DX
         ~Console();
 
         bool IsWindowFocus() const;
-        void Draw(std::function<void()> additionalTabs = []() {});
+        void Draw(std::function<void()> additionalTabs);
+        void Draw();
 
     private:
+        void _DrawImGui(std::function<void()> commandCallback);
         bool _ErrFilter, _WarnFilter, _InfFilter, _OkFilter, _CriticFilter;
         bool isFocusing;
     };

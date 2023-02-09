@@ -14,25 +14,24 @@ DX::Window::Window(HINSTANCE hInstance, const char* title, int width, int height
     winClass.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
     winClass.lpfnWndProc = &WindowProc;
     winClass.hInstance = hInstance;
-    winClass.hIcon = LoadIconW(0, IDI_APPLICATION);
     winClass.hCursor = LoadCursorW(0, IDC_ARROW);
     winClass.lpszClassName = CLASS_NAME;
-    winClass.hIconSm = LoadIconW(0, IDI_APPLICATION);
-    //if (data.useIcon) {
-    //    HICON icon = static_cast<HICON>(LoadImage( // returns a HANDLE so we have to cast to HICON
-    //        NULL,             // hInstance must be NULL when loading from a file
-    //        DX::to_wstring(data.iconFile).c_str(),   // the icon file name
-    //        IMAGE_ICON,       // specifies that the file is an icon
-    //        0,                // width of the image (we'll specify default later on)
-    //        0,                // height of the image
-    //        LR_LOADFROMFILE |  // we want to load a file (as opposed to a resource)
-    //        LR_DEFAULTSIZE |   // default metrics based on the type (IMAGE_ICON, 32x32)
-    //        LR_SHARED         // let the system release the handle when it's no longer used
-    //    ));
+    if (data.useIcon) {
 
-    //    wc.hIcon = icon;
-    //    wc.hIconSm = icon;
-    //}
+        // TODO: NEED FIX
+
+        HICON icon = (HICON)LoadImage( // returns a HANDLE so we have to cast to HICON
+            NULL,             // hInstance must be NULL when loading from a file
+            DX::to_wstring(data.iconFile).c_str(),   // the icon file name
+            IMAGE_ICON,       // specifies that the file is an icon
+            0,                // width of the image (we'll specify default later on)
+            0,                // height of the image
+            LR_LOADFROMFILE |  // we want to load a file (as opposed to a resource)
+            LR_DEFAULTSIZE);
+
+        winClass.hIcon = LoadIcon(hInstance, IDI_QUESTION);
+        winClass.hIconSm = icon;
+    }
 
     if (!RegisterClassEx(&winClass)) {
         MessageBox(NULL, L"Cannot register the win32 class!", L"Framework Error", MB_OK | MB_ICONERROR);
@@ -60,6 +59,7 @@ DX::Window::Window(HINSTANCE hInstance, const char* title, int width, int height
 
     if (hWnd == NULL) {
         MessageBox(NULL, L"Cannot create the window!", L"Framework Error", MB_OK | MB_ICONERROR);
+        UnregisterClass(L"_FRAMEWORK_WINDOW_CLASS", _instance);
         return;
     }
 
@@ -76,6 +76,8 @@ DX::Window::Window(HINSTANCE hInstance, const char* title, int width, int height
     assert(SUCCEEDED(m_mouse->SetDataFormat(&c_dfDIMouse)));
     assert(SUCCEEDED(m_mouse->SetCooperativeLevel(hWnd, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE)));
     m_mouse->Acquire();
+
+    isOpen = true;
 }
 
 DX::Window::~Window()
@@ -85,14 +87,12 @@ DX::Window::~Window()
     m_keyboard->Unacquire();
     m_keyboard->Release();
     m_directInput->Release();
-
-    DestroyWindow(hWnd);
     UnregisterClass(L"_FRAMEWORK_WINDOW_CLASS", _instance);
 }
 
 bool DX::Window::IsOpen()
 {
-    return (msg.message != WM_QUIT);
+    return isOpen;
 }
 
 void DX::Window::PoolEvents()
@@ -100,6 +100,10 @@ void DX::Window::PoolEvents()
     if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
         TranslateMessage(&msg);
         DispatchMessage(&msg);
+
+        if (msg.message == WM_QUIT) {
+            isOpen = false;
+        }
     }
 
     HRESULT result;
@@ -181,6 +185,12 @@ LRESULT DX::Window::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPara
     case WM_SIZE:
         int _width = LOWORD(lParam);  // Macro to get the low-order word.
         int _height = HIWORD(lParam); // Macro to get the high-order word.
+
+        if (_width == 0 || _height == 0) { // Window Minimized
+            // do nothing, just wait to get window focus,
+            // so we use the last window size as a reference.
+            break;
+        }
 
         width = _width;
         height = _height;

@@ -1,6 +1,9 @@
 #include "Graphic.h"
+#include "../Logger.h"
 #include "../COMException.h"
+#include "../Memory.h"
 #include <string>
+#include <sstream>
 #include <assert.h>
 
 #pragma comment(lib, "d3d11.lib")
@@ -55,6 +58,167 @@ void Graphic::CreateSwapChain()
         this->backbuffer.GetAddressOf()));
     backBufferTexture->GetDesc(&backBufferDesc);
     backBufferTexture->Release();
+}
+
+void DX::Graphic::HandleDebugLayerMessages()
+{
+    {
+        UINT64 messages = debugInfo->GetNumStoredMessages();
+        for (int i = 0; i < messages; i++) {
+            SIZE_T mSize = 0;
+            debugInfo->GetMessageW(i, nullptr, &mSize);
+
+            D3D11_MESSAGE* message = (D3D11_MESSAGE*)malloc(mSize);
+            DX_CHECK(debugInfo->GetMessageW(i, message, &mSize));
+
+            auto severity = message->Severity;
+            auto category = message->Category;
+            std::string strMessage = message->pDescription;
+
+            std::stringstream ss;
+            ss << "[D3D11] [";
+            switch (severity)
+            {
+            case D3D11_MESSAGE_SEVERITY::D3D11_MESSAGE_SEVERITY_INFO:
+                ss << "INFO]";
+                break;
+            case D3D11_MESSAGE_SEVERITY::D3D11_MESSAGE_SEVERITY_MESSAGE:
+                ss << "MESSAGE]";
+                break;
+            case D3D11_MESSAGE_SEVERITY::D3D11_MESSAGE_SEVERITY_WARNING:
+                ss << "WARNING]";
+                break;
+            case D3D11_MESSAGE_SEVERITY::D3D11_MESSAGE_SEVERITY_ERROR:
+                ss << "ERROR]";
+                break;
+            case D3D11_MESSAGE_SEVERITY::D3D11_MESSAGE_SEVERITY_CORRUPTION:
+                ss << "CORRUPTION]";
+                break;
+            }
+
+            switch (category)
+            {
+            case D3D11_MESSAGE_CATEGORY::D3D11_MESSAGE_CATEGORY_APPLICATION_DEFINED:
+                ss << " APPLICATION: ";
+                break;
+            case D3D11_MESSAGE_CATEGORY::D3D11_MESSAGE_CATEGORY_CLEANUP:
+                ss << " CLEANUP: ";
+                break;
+            case D3D11_MESSAGE_CATEGORY::D3D11_MESSAGE_CATEGORY_COMPILATION:
+                ss << " COMPILATION: ";
+                break;
+            case D3D11_MESSAGE_CATEGORY::D3D11_MESSAGE_CATEGORY_EXECUTION:
+                ss << " EXECUTION: ";
+                break;
+            case D3D11_MESSAGE_CATEGORY::D3D11_MESSAGE_CATEGORY_INITIALIZATION:
+                ss << " INITIALIZATION: ";
+                break;
+            case D3D11_MESSAGE_CATEGORY::D3D11_MESSAGE_CATEGORY_MISCELLANEOUS:
+                ss << " MISCELANEOUS: ";
+                break;
+            case D3D11_MESSAGE_CATEGORY::D3D11_MESSAGE_CATEGORY_RESOURCE_MANIPULATION:
+                ss << " RESOURCE MANIPULATION: ";
+                break;
+            case D3D11_MESSAGE_CATEGORY::D3D11_MESSAGE_CATEGORY_SHADER:
+                ss << " SHADER: ";
+                break;
+            case D3D11_MESSAGE_CATEGORY::D3D11_MESSAGE_CATEGORY_STATE_CREATION:
+                ss << " STATE CREATION: ";
+                break;
+            case D3D11_MESSAGE_CATEGORY::D3D11_MESSAGE_CATEGORY_STATE_GETTING:
+                ss << " STATE GETTING: ";
+                break;
+            case D3D11_MESSAGE_CATEGORY::D3D11_MESSAGE_CATEGORY_STATE_SETTING:
+                ss << " STATE SETTING: ";
+                break;
+            }
+
+            ss << strMessage << " {Error ID: " << message->ID << "}";
+
+            DX::LogDebugMessage(ss.str());
+            free(message);
+        }
+
+        debugInfo->ClearStoredMessages();
+    }
+    {
+        UINT64 messages = dxgiDebugInfo->GetNumStoredMessages(DXGI_DEBUG_DXGI);
+        for (int i = 0; i < messages; i++) {
+            SIZE_T mSize = 0;
+            dxgiDebugInfo->GetMessageW(DXGI_DEBUG_DXGI, i, nullptr, &mSize);
+
+            DXGI_INFO_QUEUE_MESSAGE* message = (DXGI_INFO_QUEUE_MESSAGE*)malloc(mSize);
+            DX_CHECK(dxgiDebugInfo->GetMessageW(DXGI_DEBUG_DXGI, i, message, &mSize));
+
+            auto severity = message->Severity;
+            auto category = message->Category;
+            std::string strMessage = message->pDescription;
+
+            std::stringstream ss;
+            ss << "[DXGI] [";
+            switch (severity)
+            {
+            case DXGI_INFO_QUEUE_MESSAGE_SEVERITY::DXGI_INFO_QUEUE_MESSAGE_SEVERITY_INFO:
+                ss << "INFO]";
+                break;
+            case DXGI_INFO_QUEUE_MESSAGE_SEVERITY::DXGI_INFO_QUEUE_MESSAGE_SEVERITY_MESSAGE:
+                ss << "MESSAGE]";
+                break;
+            case DXGI_INFO_QUEUE_MESSAGE_SEVERITY::DXGI_INFO_QUEUE_MESSAGE_SEVERITY_WARNING:
+                ss << "WARNING]";
+                break;
+            case DXGI_INFO_QUEUE_MESSAGE_SEVERITY::DXGI_INFO_QUEUE_MESSAGE_SEVERITY_ERROR:
+                ss << "ERROR]";
+                break;
+            case DXGI_INFO_QUEUE_MESSAGE_SEVERITY::DXGI_INFO_QUEUE_MESSAGE_SEVERITY_CORRUPTION:
+                ss << "CORRUPTION]";
+                break;
+            }
+
+            switch (category)
+            {
+            case DXGI_INFO_QUEUE_MESSAGE_CATEGORY::DXGI_INFO_QUEUE_MESSAGE_CATEGORY_CLEANUP:
+                ss << " CLEANUP: ";
+                break;
+            case DXGI_INFO_QUEUE_MESSAGE_CATEGORY::DXGI_INFO_QUEUE_MESSAGE_CATEGORY_COMPILATION:
+                ss << " COMPILATION: ";
+                break;
+            case DXGI_INFO_QUEUE_MESSAGE_CATEGORY::DXGI_INFO_QUEUE_MESSAGE_CATEGORY_EXECUTION:
+                ss << " EXECUTION: ";
+                break;
+            case DXGI_INFO_QUEUE_MESSAGE_CATEGORY::DXGI_INFO_QUEUE_MESSAGE_CATEGORY_INITIALIZATION:
+                ss << " INITIALIZATION: ";
+                break;
+            case DXGI_INFO_QUEUE_MESSAGE_CATEGORY::DXGI_INFO_QUEUE_MESSAGE_CATEGORY_MISCELLANEOUS:
+                ss << " MISCELANEOUS: ";
+                break;
+            case DXGI_INFO_QUEUE_MESSAGE_CATEGORY::DXGI_INFO_QUEUE_MESSAGE_CATEGORY_RESOURCE_MANIPULATION:
+                ss << " RESOURCE MANIPULATION: ";
+                break;
+            case DXGI_INFO_QUEUE_MESSAGE_CATEGORY::DXGI_INFO_QUEUE_MESSAGE_CATEGORY_SHADER:
+                ss << " SHADER: ";
+                break;
+            case DXGI_INFO_QUEUE_MESSAGE_CATEGORY::DXGI_INFO_QUEUE_MESSAGE_CATEGORY_STATE_CREATION:
+                ss << " STATE CREATION: ";
+                break;
+            case DXGI_INFO_QUEUE_MESSAGE_CATEGORY::DXGI_INFO_QUEUE_MESSAGE_CATEGORY_STATE_GETTING:
+                ss << " STATE GETTING: ";
+                break;
+            case DXGI_INFO_QUEUE_MESSAGE_CATEGORY::DXGI_INFO_QUEUE_MESSAGE_CATEGORY_STATE_SETTING:
+                ss << " STATE SETTING: ";
+                break;
+            case DXGI_INFO_QUEUE_MESSAGE_CATEGORY::DXGI_INFO_QUEUE_MESSAGE_CATEGORY_UNKNOWN:
+                ss << " UNKNOWN: ";
+                break;
+            }
+
+            ss << strMessage;
+            DX::LogDebugMessage(ss.str());
+            free(message);
+        }
+
+        dxgiDebugInfo->ClearStoredMessages(DXGI_DEBUG_DXGI);
+    }
 }
 
 Graphic::Graphic(Window* win, bool fullscreen)
@@ -150,22 +314,44 @@ Graphic::Graphic(Window* win, bool fullscreen)
     this->CreateDepthStencilBuffer(winRef->GetWidth(), winRef->GetHeight());
     CreateSwapChain();
     swapchain->SetFullscreenState(fullscreen, nullptr);
+
+#if defined(_DEBUG)
+    // Create Debug Layer
+    DX_CHECK(dev.As(&debuglayer));
+    assert(debuglayer);
+    DX_CHECK(debuglayer.As(&debugInfo));
+    assert(debugInfo);
+
+    DX_CHECK(DXGIGetDebugInterface1(0, IID_PPV_ARGS(dxgiDebugInfo.GetAddressOf())));
+    assert(dxgiDebugInfo);
+#endif
 }
 
 Graphic::~Graphic()
 {
-    if (backbuffer) backbuffer.Reset();
-    if (swapchain) swapchain.Reset();
-    if (depthStencilBuffer) depthStencilBuffer.Reset();
-    if (depthStencilState) depthStencilState.Reset();
-    if (depthStencilView) depthStencilView.Reset();
-    if (rasterizerState) rasterizerState.Reset();
-    if (_dxgifactory) _dxgifactory.Reset();
-    if (endQuery) endQuery.Reset();
-    if (startQuery) startQuery.Reset();
-    if (disjoinQuery) disjoinQuery.Reset();
-    if (devcon) devcon.Reset();
-    if (dev) dev.Reset();
+    devcon->Flush();
+    winRef = nullptr;
+    Memory::Destroy(endQuery);
+    Memory::Destroy(startQuery);
+    Memory::Destroy(disjoinQuery);
+
+    Memory::Destroy(backbuffer);
+    Memory::Destroy(depthStencilBuffer);
+    Memory::Destroy(depthStencilState);
+    Memory::Destroy(depthStencilView);
+    Memory::Destroy(rasterizerState);
+    Memory::Destroy(swapchain);
+    
+    Memory::Destroy(_dxgifactory);
+#if defined(_DEBUG)
+    debuglayer->ReportLiveDeviceObjects(
+        D3D11_RLDO_FLAGS::D3D11_RLDO_DETAIL
+    );
+    Memory::Destroy(debuglayer);
+    Memory::Destroy(debugInfo);
+#endif
+    Memory::Destroy(devcon);
+    Memory::Destroy(dev);
 }
 
 float DX::Graphic::GetGPUTime()
@@ -233,6 +419,10 @@ void Graphic::Present(int vsync)
     devcon->End(disjoinQuery.Get());
     while (devcon->GetData(disjoinQuery.Get(), nullptr, 0, 0) == S_FALSE) { Sleep(1); }
 
+#if defined(_DEBUG)
+    // Handle debug messages every frame to know if something goes wrong
+    HandleDebugLayerMessages();
+#endif
 }
 
 void Graphic::SetViewport(int width, int height, int x, int y)

@@ -45,6 +45,7 @@ namespace DX {
 	private:
 		static LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 		static int width, height;
+		bool isOpen;
 		HINSTANCE _instance;
 		HWND hWnd;
 		MSG msg = {};

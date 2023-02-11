@@ -126,19 +126,9 @@ Application::Application(HINSTANCE hInstance)
 #endif
 		data->assetManager.InitResources("Assets/Data.json");
 		srand((unsigned)time(NULL));
-<<<<<<< HEAD
-<<<<<<< HEAD
 		data->TimeStep = 1.0f;
 		QueryPerformanceCounter(&start_time);
 		QueryPerformanceFrequency(&frequency);
-=======
-		QueryPerformanceCounter((LARGE_INTEGER*)&lastCount);
-		QueryPerformanceFrequency((LARGE_INTEGER*)&frequency);
->>>>>>> 9c80a885c9db45016df07b61bda58a717cd97caf
-=======
-		QueryPerformanceCounter((LARGE_INTEGER*)&lastCount);
-		QueryPerformanceFrequency((LARGE_INTEGER*)&frequency);
->>>>>>> 9c80a885c9db45016df07b61bda58a717cd97caf
 	}
 	catch (DX::com_exception e) {
 		MessageBox(data->window->GetHandle(), DX::toWchar(e.what()), L"ERROR", MB_OK | MB_ICONERROR);
@@ -182,25 +172,12 @@ void Application::update()
 	data->window->PoolEvents();
 	data->STmachine.ProcessChanges();
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 	QueryPerformanceCounter(&end_time);
 	dt = (end_time.QuadPart - start_time.QuadPart) * (1.0f / frequency.QuadPart);
 
-	if (dt >= 1.f / data->FrameLimit) {
-		start_time = end_time;
-		data->FPS = 1.f / dt;
-=======
-=======
->>>>>>> 9c80a885c9db45016df07b61bda58a717cd97caf
-	QueryPerformanceCounter((LARGE_INTEGER*)&currentCount);
-
-	dt = static_cast<float>((currentCount - lastCount) * (1.0f / frequency));
-	OutputDebugStringA(std::to_string(frequency).append("\n").c_str());
 	if (dt >= 1.0f / data->FrameLimit) {
-		lastCount = currentCount;
+		start_time = end_time;
 		data->FPS = 1.0f / dt;
->>>>>>> 9c80a885c9db45016df07b61bda58a717cd97caf
 		// Fix the cpu time to 2 decimal precision
 		int value = (int)((dt * 1000) * 100 + .5);
 		data->CPU_TIME = (float)value / 100;
@@ -215,19 +192,9 @@ void Application::update()
 
 void Application::draw()
 {
-<<<<<<< HEAD
-<<<<<<< HEAD
-	if (dt >= 1.f / data->FrameLimit) {
-=======
 	if (dt >= 1.0f / data->FrameLimit) {
 		io->DisplaySize = ImVec2((float)data->window->GetWidth(), (float)data->window->GetHeight());
 
->>>>>>> 9c80a885c9db45016df07b61bda58a717cd97caf
-=======
-	if (dt >= 1.0f / data->FrameLimit) {
-		io->DisplaySize = ImVec2((float)data->window->GetWidth(), (float)data->window->GetHeight());
-
->>>>>>> 9c80a885c9db45016df07b61bda58a717cd97caf
 		auto startTime = std::chrono::high_resolution_clock::now();
 		float color[] = { 0, 0, 0, 1.0 };
 		data->D3Dgraphic->Clear(color);
@@ -243,22 +210,7 @@ void Application::draw()
 		// Draw
 		data->STmachine.GetActiveState()->draw();
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 		ImGui::EndFrame();
-=======
-=======
->>>>>>> 9c80a885c9db45016df07b61bda58a717cd97caf
-		ImGui::Begin("ff", &opened);
-		ImGui::Text("%f", dt);
-		ImGui::End();
-
-		ImGui::EndFrame();
-
-<<<<<<< HEAD
->>>>>>> 9c80a885c9db45016df07b61bda58a717cd97caf
-=======
->>>>>>> 9c80a885c9db45016df07b61bda58a717cd97caf
 		ImGui::Render();
 		ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 

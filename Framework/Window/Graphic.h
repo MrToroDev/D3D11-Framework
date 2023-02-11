@@ -27,30 +27,16 @@ namespace DX
 		ComPtr<ID3D11Query> endQuery = nullptr;
 		ComPtr<ID3D11Query> disjoinQuery = nullptr;
 		ComPtr<ID3D11RenderTargetView> backbuffer = nullptr;    // the pointer to our back buffer
-<<<<<<< HEAD
+
 #if defined(_DEBUG)
 		ComPtr<ID3D11Debug> debuglayer = nullptr;
 		ComPtr<ID3D11InfoQueue> debugInfo = nullptr;
 		ComPtr<IDXGIInfoQueue> dxgiDebugInfo = nullptr;
 #endif
-=======
-
-		ComPtr<ID3D11Debug> debuglayer = nullptr;
-		ComPtr<ID3D11InfoQueue> debugInfo = nullptr;
-		ComPtr<IDXGIInfoQueue> dxgiDebugInfo = nullptr;
-<<<<<<< HEAD
->>>>>>> 9c80a885c9db45016df07b61bda58a717cd97caf
-=======
->>>>>>> 9c80a885c9db45016df07b61bda58a717cd97caf
 
 		void CreateDepthStencilBuffer(int width, int height);
 		void CreateSwapChain();
 		void DebugLayer();
-<<<<<<< HEAD
-
-		void HandleDebugLayerMessages();
-=======
->>>>>>> 9c80a885c9db45016df07b61bda58a717cd97caf
 
 	public:
 		Graphic(Window* win, bool fullscreen);

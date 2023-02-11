@@ -49,31 +49,12 @@ class Application
 private:
 	ApplicationDataRef data = std::make_shared<ApplicationData>();
 	float dt;
-<<<<<<< HEAD
-<<<<<<< HEAD
 	LARGE_INTEGER start_time, end_time, frequency;
-=======
-	bool opened = true;
-	uint64_t lastCount, currentCount, frequency;
->>>>>>> 9c80a885c9db45016df07b61bda58a717cd97caf
-=======
-	bool opened = true;
-	uint64_t lastCount, currentCount, frequency;
->>>>>>> 9c80a885c9db45016df07b61bda58a717cd97caf
 	ImGuiIO* io;
 
 	void InitWinGraphic(HINSTANCE hinstance);
 	void InitImgui();
 	void InitConfig();
-<<<<<<< HEAD
-<<<<<<< HEAD
-
-=======
-	
->>>>>>> 9c80a885c9db45016df07b61bda58a717cd97caf
-=======
-	
->>>>>>> 9c80a885c9db45016df07b61bda58a717cd97caf
 public:
 	Application(HINSTANCE hInstance);
 	~Application();

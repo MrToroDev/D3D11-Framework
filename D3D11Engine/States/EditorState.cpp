@@ -68,12 +68,9 @@ void EditorState::update(float dt)
 			camera.AdjustRotation(0, 1 * dt * 0.3f, 0);
 		}
 	}
-<<<<<<< HEAD
-=======
 	if (_data->window->IsKeyPressed(DIK_RIGHT)) {
 		camera.AdjustRotation(0, 1 * dt * 0.3, 0);
 	}
->>>>>>> 9c80a885c9db45016df07b61bda58a717cd97caf
 
 	_renderTarget->SetConstantBufferData(_data->D3Dgraphic->getDeviceContext(), false, 1.0f, 2.1f, false, 128, dt);
 
@@ -138,19 +135,11 @@ void EditorState::draw()
 				this->destroy();
 				this->init();
 			}
-<<<<<<< HEAD
-
-		ImGui::EndMainMenuBar();
-	}
-
-=======
 			ImGui::EndMenu();
 		}
 
 		ImGui::EndMainMenuBar();
 	}
-
->>>>>>> 9c80a885c9db45016df07b61bda58a717cd97caf
 	if (showEditor) {
 		int flags = ImGuiWindowFlags_::ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_::ImGuiWindowFlags_NoScrollWithMouse;
 		ImGui::Begin("Viewport", (bool*)0, flags);

@@ -2,6 +2,7 @@
 #include "../Logger.h"
 #include "../COMException.h"
 #include "../Memory.h"
+#include "../Utils/Utils.h"
 #include <string>
 #include <sstream>
 #include <assert.h>
@@ -39,7 +40,6 @@ void DX::Graphic::CreateDepthStencilBuffer(int width, int height)
     DSDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
 
     DX_CHECK(this->dev->CreateDepthStencilState(&DSDesc, depthStencilState.GetAddressOf()));
-
 }
 
 void Graphic::CreateSwapChain()
@@ -58,6 +58,7 @@ void Graphic::CreateSwapChain()
         this->backbuffer.GetAddressOf()));
     backBufferTexture->GetDesc(&backBufferDesc);
     backBufferTexture->Release();
+    backBufferTexture = nullptr;
 }
 
 void DX::Graphic::DebugLayer()
@@ -324,6 +325,18 @@ Graphic::Graphic(Window* win, bool fullscreen)
     DX_CHECK(DXGIGetDebugInterface1(0, IID_PPV_ARGS(dxgiDebugInfo.GetAddressOf())));
     assert(dxgiDebugInfo);
 #endif
+
+    constexpr char deviceName[] = "DEV_Main";
+    dev->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(deviceName), deviceName);
+    SetDebugObjectName(devcon.Get(), "DeviceContext_Main");
+    SetDebugObjectName(depthStencilView.Get(), "DepthbufferView_Swapchain");
+    SetDebugObjectName(depthStencilBuffer.Get(), "DepthbufferBuffer_Swapchain");
+    SetDebugObjectName(depthStencilState.Get(), "DepthbufferState_Swapchain");
+    SetDebugObjectName(rasterizerState.Get(), "Rasterizer_Graphic");
+    SetDebugObjectName(startQuery.Get(), "StartQuery");
+    SetDebugObjectName(endQuery.Get(), "EndQuery");
+    SetDebugObjectName(disjoinQuery.Get(), "DisjoinQuery");
+    SetDebugObjectName(backbuffer.Get(), "SwapchainImage");
 }
 
 Graphic::~Graphic()
@@ -333,24 +346,30 @@ Graphic::~Graphic()
     Memory::Destroy(endQuery);
     Memory::Destroy(startQuery);
     Memory::Destroy(disjoinQuery);
-
+    devcon->Flush();
     Memory::Destroy(backbuffer);
     Memory::Destroy(depthStencilBuffer);
     Memory::Destroy(depthStencilState);
     Memory::Destroy(depthStencilView);
     Memory::Destroy(rasterizerState);
+    swapchain->SetFullscreenState(false, nullptr);
     Memory::Destroy(swapchain);
-    
+    devcon->Flush();
+    devcon->ClearState();
     Memory::Destroy(_dxgifactory);
 #if defined(_DEBUG)
     debuglayer->ReportLiveDeviceObjects(
-        D3D11_RLDO_FLAGS::D3D11_RLDO_DETAIL
+        D3D11_RLDO_FLAGS::D3D11_RLDO_IGNORE_INTERNAL
     );
+#endif
+    devcon->Flush();
+    Memory::Destroy(devcon);
+    Memory::Destroy(dev);
+
+#if defined(_DEBUG)
     Memory::Destroy(debuglayer);
     Memory::Destroy(debugInfo);
 #endif
-    Memory::Destroy(devcon);
-    Memory::Destroy(dev);
 }
 
 float DX::Graphic::GetGPUTime()

@@ -11,7 +11,7 @@ with some information that could be util.
 | NAME  | PARAMETER | DESC |
 |-------|-----------|------|
 | Build | Working   |      |
-| Run   | Depends   | The context doesnt get destroy, so techincally yes, but no. |
+| Run   | Working   | :) |
 
 (this can seem very odd, but is the only way i can update the status of this branch)
 

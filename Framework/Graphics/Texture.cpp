@@ -1,6 +1,7 @@
 #include "Texture.h"
 #include "../COMException.h"
 #include "../Logger.h"
+#include "../Utils/Utils.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 #include <future>
@@ -112,6 +113,13 @@ DX::Texture::Texture(Pixel* pixels, int width, int height, Microsoft::WRL::ComPt
 DX::Texture::~Texture()
 {
 	if (textureSRV) this->textureSRV.Reset();
+}
+
+void DX::Texture::SetObjectName(const char name[256])
+{
+	char n[256];
+	sprintf_s(n, "%s_SRV", name);
+	SetDebugObjectName(textureSRV.Get(), n);
 }
 
 void DX::Texture::Bind(Microsoft::WRL::ComPtr<ID3D11DeviceContext> devcon, int count)

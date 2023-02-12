@@ -19,6 +19,8 @@ namespace DX {
 		Texture(Pixel* pixels, int width, int height, Microsoft::WRL::ComPtr<ID3D11Device> dev);
 		~Texture();
 
+		void SetObjectName(const char name[256]);
+
 		void Bind(Microsoft::WRL::ComPtr<ID3D11DeviceContext> devcon, int count);
 		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> GetShaderResourceView() const;
 	};

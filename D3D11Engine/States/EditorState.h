@@ -38,8 +38,8 @@ private:
 	bool UpdateViewport;
 	ApplicationDataRef _data;
 	DX::RenderTarget<DX::RenderType::RenderTarget>* _renderTarget;
-	DX::ConstantBuffer<MVPData> cbuffer_Cube;
-	DX::ConstantBuffer<MVPData> cbuffer_Cube2;
+	DX::ConstantBuffer<MVPData>* cbuffer_Cube;
+	DX::ConstantBuffer<MVPData>* cbuffer_Cube2;
 	DX::Camera camera;
 	DX::Mesh* mesh_test;
 	DX::Mesh* billboard;

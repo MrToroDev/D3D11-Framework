@@ -1,10 +1,12 @@
 #include "Mesh.h"
 #include "GraphicLoader.h"
 #include "../Utils/Utils.h"
+#include "../Memory.h"
 #include "../COMException.h"
 #include <filesystem>
+#include <string>
 
-void DX::Mesh::initShaders(Microsoft::WRL::ComPtr<ID3D11Device> dev, std::wstring p, std::wstring v, std::string vmain, std::string pmain)
+void DX::Mesh::initShaders(ID3D11Device* dev, std::wstring p, std::wstring v, std::string vmain, std::string pmain)
 {
     if (p.substr(p.find_last_of('.') + 1) == L"hlsl" && v.substr(p.find_last_of('.') + 1) == L"hlsl") {
         if (!CompileShaderFromFile(p.c_str(), pmain.c_str(), "ps_5_0", pixelShaderBlob)) {
@@ -46,7 +48,7 @@ void DX::Mesh::initShaders(Microsoft::WRL::ComPtr<ID3D11Device> dev, std::wstrin
         &vertexShader));
 }
 
-void DX::Mesh::initBuffer(Microsoft::WRL::ComPtr<ID3D11Device> dev, std::vector<VertexTexture> vertex, std::vector<int> indices)
+void DX::Mesh::initBuffer(ID3D11Device* dev, std::vector<VertexTexture> vertex, std::vector<int> indices)
 {
     D3D11_BUFFER_DESC bufferInfo = {};
     bufferInfo.ByteWidth = static_cast<UINT>(sizeof(VertexTexture) * vertex.size());
@@ -71,7 +73,7 @@ void DX::Mesh::initBuffer(Microsoft::WRL::ComPtr<ID3D11Device> dev, std::vector<
     ));
 }
 
-void DX::Mesh::initBuffer(Microsoft::WRL::ComPtr<ID3D11Device> dev, float* v, std::vector<int> indices)
+void DX::Mesh::initBuffer(ID3D11Device* dev, float* v, std::vector<int> indices)
 {
     D3D11_BUFFER_DESC bufferInfo = {};
     bufferInfo.ByteWidth = 4 * sizeof(v);
@@ -96,7 +98,7 @@ void DX::Mesh::initBuffer(Microsoft::WRL::ComPtr<ID3D11Device> dev, float* v, st
     ));
 }
 
-void DX::Mesh::initInputLayout(Microsoft::WRL::ComPtr<ID3D11Device> dev)
+void DX::Mesh::initInputLayout(ID3D11Device* dev)
 {
     constexpr D3D11_INPUT_ELEMENT_DESC vertexInputLayoutInfo[] =
     {
@@ -147,7 +149,7 @@ void DX::Mesh::initInputLayout(Microsoft::WRL::ComPtr<ID3D11Device> dev)
 
 }
 
-void DX::Mesh::initInputLayout_V(Microsoft::WRL::ComPtr<ID3D11Device> dev)
+void DX::Mesh::initInputLayout_V(ID3D11Device* dev)
 {
     constexpr D3D11_INPUT_ELEMENT_DESC vertexInputLayoutInfo[] =
     {
@@ -197,14 +199,14 @@ void DX::Mesh::initInputLayout_V(Microsoft::WRL::ComPtr<ID3D11Device> dev)
         &inputLayout));
 }
 
-DX::Mesh::Mesh(Microsoft::WRL::ComPtr<ID3D11Device> dev, std::wstring ShaderFile, std::string psmain, std::string vsmain, std::vector<VertexTexture> v, std::vector<int> indices)
+DX::Mesh::Mesh(ID3D11Device* dev, std::wstring ShaderFile, std::string psmain, std::string vsmain, std::vector<VertexTexture> v, std::vector<int> indices)
 {
     this->initShaders(dev, ShaderFile, ShaderFile, vsmain, psmain);
     this->initInputLayout(dev);
     this->initBuffer(dev, v, indices);
 }
 
-DX::Mesh::Mesh(Microsoft::WRL::ComPtr<ID3D11Device> dev, std::wstring ShaderFile, std::string psmain, std::string vsmain, float* v, std::vector<int> indices)
+DX::Mesh::Mesh(ID3D11Device* dev, std::wstring ShaderFile, std::string psmain, std::string vsmain, float* v, std::vector<int> indices)
 {
     this->initShaders(dev, ShaderFile, ShaderFile, vsmain, psmain);
     this->initInputLayout_V(dev);
@@ -212,18 +214,33 @@ DX::Mesh::Mesh(Microsoft::WRL::ComPtr<ID3D11Device> dev, std::wstring ShaderFile
     isVertexRawFloat = true;
 }
 
-DX::Mesh::~Mesh()
+void DX::Mesh::SetObjectName(const char name[256])
 {
-    if (pixelShader) this->pixelShader.Reset();
-    if (pixelShaderBlob) this->pixelShaderBlob.Reset();
-    if (vertexShader) this->vertexShader.Reset();
-    if (vertexShaderBlob) this->vertexShaderBlob.Reset();
-    if (inputLayout) this->inputLayout.Reset();
-    if (Vbuffer) this->Vbuffer.Reset();
-    if (Ibuffer) this->Ibuffer.Reset();
+    char n[256];
+    sprintf_s(n, "%s_PixelShader", name);
+    SetDebugObjectName(pixelShader.Get(), n);
+    sprintf_s(n, "%s_VertexShader", name);
+    SetDebugObjectName(vertexShader.Get(), n);
+    sprintf_s(n, "%s_InputLayout", name);
+    SetDebugObjectName(inputLayout.Get(), n);
+    sprintf_s(n, "%s_VertexBuffer", name);
+    SetDebugObjectName(Vbuffer.Get(), n);
+    sprintf_s(n, "%s_IndexBuffer", name);
+    SetDebugObjectName(Ibuffer.Get(), n);
 }
 
-void DX::Mesh::prepareDraw(Microsoft::WRL::ComPtr<ID3D11DeviceContext> devcon)
+DX::Mesh::~Mesh()
+{
+    Memory::Destroy(this->pixelShader);
+    Memory::Destroy(this->pixelShaderBlob);
+    Memory::Destroy(this->vertexShader);
+    Memory::Destroy(this->vertexShaderBlob);
+    Memory::Destroy(this->inputLayout);
+    Memory::Destroy(this->Vbuffer);
+    Memory::Destroy(this->Ibuffer);
+}
+
+void DX::Mesh::prepareDraw(ID3D11DeviceContext* devcon)
 {
     UINT vertexOffset = 0;
     UINT vertexStride;
@@ -251,7 +268,7 @@ void DX::Mesh::prepareDraw(Microsoft::WRL::ComPtr<ID3D11DeviceContext> devcon)
         0);
 }
 
-void DX::Mesh::Draw(Microsoft::WRL::ComPtr<ID3D11DeviceContext> devcon, int vertCount)
+void DX::Mesh::Draw(ID3D11DeviceContext* devcon, int vertCount)
 {
     devcon->DrawIndexed(vertCount, 0, 0);
 }

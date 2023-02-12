@@ -13,9 +13,10 @@ void EditorState::init()
 {
 	showEditor = true;
 	_renderTarget = new DX::RenderTarget<DX::RenderType::RenderTarget>(
-		_data->D3Dgraphic->getDevice(), _data->D3Dgraphic->getDeviceContext(),
+		_data->D3Dgraphic->getDevice().Get(), _data->D3Dgraphic->getDeviceContext().Get(),
 		500, 500, DX::to_wstring(_data->assetManager.GetShader("renderTarget")),
 		DXGI_FORMAT::DXGI_FORMAT_R16G16B16A16_FLOAT);
+	_renderTarget->SetObjectName("RenderTarget");
 
 	spriteBatch = new DirectX::DX11::SpriteBatch(_data->D3Dgraphic->getDeviceContext().Get());
 	spriteFont = new DirectX::DX11::SpriteFont(_data->D3Dgraphic->getDevice().Get(),
@@ -33,14 +34,18 @@ void EditorState::init()
 	};
 
 	sampler = new DX::SamplerState(_data->D3Dgraphic->getDevice(), D3D11_TEXTURE_ADDRESS_BORDER, D3D11_TEXTURE_ADDRESS_BORDER, D3D11_TEXTURE_ADDRESS_BORDER, D3D11_FILTER_MIN_MAG_MIP_LINEAR);
-	cbuffer_Cube.Initialize(_data->D3Dgraphic->getDevice().Get());
-	cbuffer_Cube2.Initialize(_data->D3Dgraphic->getDevice().Get());
+	sampler->SetObjectName("LinearSampler");
+	cbuffer_Cube = new DX::ConstantBuffer<MVPData>(_data->D3Dgraphic->getDevice().Get());
+	cbuffer_Cube->SetObjectName("cbuffer_Cube");
+	cbuffer_Cube2 = new DX::ConstantBuffer<MVPData>(_data->D3Dgraphic->getDevice().Get());
+	cbuffer_Cube2->SetObjectName("cbuffer_Cube2");
 	auto test = DX::LoadMeshFile("Assets/Models/Cube.mesh");
-	mesh_test = new DX::Mesh(_data->D3Dgraphic->getDevice(), DX::to_wstring(_data->assetManager.GetShader("cube")), "PSMain", "VSMain", test.vertices, test.indices);
-	
-	plane = new DX::Mesh(_data->D3Dgraphic->getDevice(), DX::to_wstring(_data->assetManager.GetShader("cube")), "PSMain", "VSMain", plane_v, plane_i);
-	
-	billboard = new DX::Mesh(_data->D3Dgraphic->getDevice(), DX::to_wstring(_data->assetManager.GetShader("billboard")), "PS", "VS", plane_v, plane_i);
+	mesh_test = new DX::Mesh(_data->D3Dgraphic->getDevice().Get() , DX::to_wstring(_data->assetManager.GetShader("cube")), "PSMain", "VSMain", test.vertices, test.indices);
+	mesh_test->SetObjectName("mesh_object");
+	plane = new DX::Mesh(_data->D3Dgraphic->getDevice().Get(), DX::to_wstring(_data->assetManager.GetShader("cube")), "PSMain", "VSMain", plane_v, plane_i);
+	plane->SetObjectName("plane");
+	billboard = new DX::Mesh(_data->D3Dgraphic->getDevice().Get(), DX::to_wstring(_data->assetManager.GetShader("billboard")), "PS", "VS", plane_v, plane_i);
+	billboard->SetObjectName("billboard");
 	billboard_texture = new DX::Texture(_data->assetManager.GetTexture("dximage").c_str(), _data->D3Dgraphic->getDevice());
 }
 
@@ -72,7 +77,7 @@ void EditorState::update(float dt)
 		camera.AdjustRotation(0, 1 * dt * 0.3, 0);
 	}
 
-	_renderTarget->SetConstantBufferData(_data->D3Dgraphic->getDeviceContext(), false, 1.0f, 2.1f, false, 128, dt);
+	_renderTarget->SetConstantBufferData(_data->D3Dgraphic->getDeviceContext().Get(), false, 1.0f, 2.1f, false, 128, dt);
 
 	DirectX::XMMATRIX _p = DirectX::XMMatrixPerspectiveFovLH(
 		(60.0f / 360.0f) / DirectX::XM_2PI,
@@ -88,18 +93,18 @@ void EditorState::update(float dt)
 		) * 
 		DirectX::XMMatrixTranslation(_cubeT.Position.x, _cubeT.Position.y, _cubeT.Position.z) * dt;
 	
-	DirectX::XMStoreFloat4x4(&cbuffer_Cube.data.projection, DirectX::XMMatrixTranspose(_p));
-	DirectX::XMStoreFloat4x4(&cbuffer_Cube.data.view, DirectX::XMMatrixTranspose(camera.GetViewMatrix()));
-	DirectX::XMStoreFloat4x4(&cbuffer_Cube.data.worldPos, DirectX::XMMatrixTranspose(_m));
-	cbuffer_Cube.ApplyChanges(_data->D3Dgraphic->getDeviceContext().Get());
+	DirectX::XMStoreFloat4x4(&cbuffer_Cube->data.projection, DirectX::XMMatrixTranspose(_p));
+	DirectX::XMStoreFloat4x4(&cbuffer_Cube->data.view, DirectX::XMMatrixTranspose(camera.GetViewMatrix()));
+	DirectX::XMStoreFloat4x4(&cbuffer_Cube->data.worldPos, DirectX::XMMatrixTranspose(_m));
+	cbuffer_Cube->ApplyChanges(_data->D3Dgraphic->getDeviceContext().Get());
 	
-	DirectX::XMStoreFloat4x4(&cbuffer_Cube2.data.projection, DirectX::XMMatrixTranspose(_p));
-	DirectX::XMStoreFloat4x4(&cbuffer_Cube2.data.view, DirectX::XMMatrixTranspose(camera.GetViewMatrix()));
+	DirectX::XMStoreFloat4x4(&cbuffer_Cube2->data.projection, DirectX::XMMatrixTranspose(_p));
+	DirectX::XMStoreFloat4x4(&cbuffer_Cube2->data.view, DirectX::XMMatrixTranspose(camera.GetViewMatrix()));
 	auto e = DirectX::XMFLOAT3(0.0f, 0.0f, 1.0f);
-	DirectX::XMStoreFloat4x4(&cbuffer_Cube2.data.worldPos, DirectX::XMMatrixTranspose(
+	DirectX::XMStoreFloat4x4(&cbuffer_Cube2->data.worldPos, DirectX::XMMatrixTranspose(
 		DX::Math::Billboard(camera.GetPositionFloat3(), DirectX::XMFLOAT3(0, 1, 0), &e, DirectX::XMFLOAT3(0.0f, 0.0f, -3.0f))
 	));
-	cbuffer_Cube2.ApplyChanges(_data->D3Dgraphic->getDeviceContext().Get());
+	cbuffer_Cube2->ApplyChanges(_data->D3Dgraphic->getDeviceContext().Get());
 }
 
 void EditorState::draw()
@@ -107,14 +112,14 @@ void EditorState::draw()
 	_data->D3Dgraphic->UnBoundRenderTarget();
 	float color[4] = { 0, 1, 1, 1 };
 
-	_renderTarget->SetRenderTarget(_data->D3Dgraphic->getDevice(), _data->D3Dgraphic->getDeviceContext(), _data->window->GetWidth(), _data->window->GetHeight());
-	_renderTarget->Clear(_data->D3Dgraphic->getDeviceContext(), color);
+	_renderTarget->SetRenderTarget(_data->D3Dgraphic->getDevice().Get(), _data->D3Dgraphic->getDeviceContext().Get(), _data->window->GetWidth(), _data->window->GetHeight());
+	_renderTarget->Clear(_data->D3Dgraphic->getDeviceContext().Get(), color);
 
-	mesh_test->prepareDraw(_data->D3Dgraphic->getDeviceContext());
+	mesh_test->prepareDraw(_data->D3Dgraphic->getDeviceContext().Get());
 	sampler->Bind(_data->D3Dgraphic->getDeviceContext(), 0);
 	billboard_texture->Bind(_data->D3Dgraphic->getDeviceContext(), 0);
-	cbuffer_Cube.Bind(_data->D3Dgraphic->getDeviceContext().Get(), 0, DX::ConstantBuffer_BindType::VertexShader);
-	mesh_test->Draw(_data->D3Dgraphic->getDeviceContext(), 36);
+	cbuffer_Cube->Bind(_data->D3Dgraphic->getDeviceContext().Get(), 0, DX::ConstantBuffer_BindType::VertexShader);
+	mesh_test->Draw(_data->D3Dgraphic->getDeviceContext().Get(), 36);
 
 	spriteBatch->Begin();
 	std::stringstream ss;
@@ -124,7 +129,7 @@ void EditorState::draw()
 	spriteFont->DrawString(spriteBatch, ss.str().c_str(), DirectX::XMFLOAT2(0, 0), DirectX::Colors::White, 0.0f, DirectX::XMFLOAT2(0, 0), 2);
 	spriteBatch->End();
 
-	_renderTarget->UnBoundTarget(_data->D3Dgraphic->getDeviceContext());
+	_renderTarget->UnBoundTarget(_data->D3Dgraphic->getDeviceContext().Get());
 
 	_data->D3Dgraphic->SetRenderTarget();
 	
@@ -183,7 +188,7 @@ void EditorState::draw()
 	ImGui::End();
 
 	if (!showEditor) {
-		_renderTarget->Draw(_data->D3Dgraphic->getDeviceContext());
+		_renderTarget->Draw(_data->D3Dgraphic->getDeviceContext().Get());
 		this->UpdateViewport = true;
 	}
 
@@ -202,7 +207,14 @@ void EditorState::draw()
 
 void EditorState::destroy()
 {
+	delete mesh_test;
+	delete plane;
+	delete billboard;
 	delete spriteBatch;
 	delete spriteFont;
+	delete sampler;
+	delete cbuffer_Cube;
+	delete cbuffer_Cube2;
+	delete billboard_texture;
 	delete _renderTarget;
 }

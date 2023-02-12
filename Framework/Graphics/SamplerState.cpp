@@ -1,5 +1,6 @@
 #include "SamplerState.h"
 #include "../COMException.h"
+#include "../Utils/Utils.h"
 #include "../Memory.h"
 
 DX::SamplerState::SamplerState(
@@ -24,6 +25,13 @@ DX::SamplerState::SamplerState(
 DX::SamplerState::~SamplerState()
 {
 	Memory::Destroy(sampler);
+}
+
+void DX::SamplerState::SetObjectName(const char name[256])
+{
+	char n[256];
+	sprintf_s(n, "%s_SamplerState", name);
+	SetDebugObjectName(sampler.Get(), n);
 }
 
 void DX::SamplerState::Bind(Microsoft::WRL::ComPtr<ID3D11DeviceContext> devcon, int count)

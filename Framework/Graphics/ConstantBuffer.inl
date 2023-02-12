@@ -1,28 +1,17 @@
 #include "../Logger.h"
 #include <sstream>
 #include "../Memory.h"
+#include "../Utils/Utils.h"
 #include "ConstantBuffer.h"
 
 template<class T>
 inline DX::ConstantBuffer<T>::~ConstantBuffer()
 {
-	if (buffer) buffer.Reset();
+	Memory::Destroy(buffer);
 }
 
 template<class T>
-ID3D11Buffer* DX::ConstantBuffer<T>::Get() const
-{
-	return buffer.Get();
-}
-
-template<class T>
-ID3D11Buffer* const* DX::ConstantBuffer<T>::GetAddressOf() const
-{
-	return buffer.GetAddressOf();
-}
-
-template<class T>
-HRESULT DX::ConstantBuffer<T>::Initialize(ID3D11Device* device)
+inline DX::ConstantBuffer<T>::ConstantBuffer(ID3D11Device* device)
 {
 	std::stringstream ss;
 	ss << "[COSTANT-BUFFER] Allocating " << sizeof(T) << " bytes";
@@ -38,7 +27,26 @@ HRESULT DX::ConstantBuffer<T>::Initialize(ID3D11Device* device)
 
 	HRESULT hr = device->CreateBuffer(&desc, 0, buffer.GetAddressOf());
 	DX_CHECK(hr);
-	return hr;
+}
+
+template<class T>
+inline void DX::ConstantBuffer<T>::SetObjectName(const char name[256])
+{
+	char n[256];
+	sprintf_s(n, "%s_Buffer", name);
+	SetDebugObjectName(buffer.Get(), n);
+}
+
+template<class T>
+ID3D11Buffer* DX::ConstantBuffer<T>::Get() const
+{
+	return buffer.Get();
+}
+
+template<class T>
+ID3D11Buffer* const* DX::ConstantBuffer<T>::GetAddressOf() const
+{
+	return buffer.GetAddressOf();
 }
 
 template<class T>

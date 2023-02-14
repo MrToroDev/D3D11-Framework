@@ -34,7 +34,7 @@ struct ApplicationData
 	bool vsync;
 	float TimeStep;
 
-	// THESE VARIABLES ARE UPDATED IN THE APPLICATION LOOp
+	// THESE VARIABLES ARE UPDATED IN THE APPLICATION LOOP
 
 	float FPS;
 	float CPU_TIME;

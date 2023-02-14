@@ -145,7 +145,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <None Include="Graphics\ConstantBuffer.inl" />
-    <None Include="Graphics\RenderTarget.inl" />
     <None Include="Memory.inl" />
   </ItemGroup>
   <ItemGroup>
@@ -165,6 +164,7 @@
     <ClCompile Include="Graphics\Camera.cpp" />
     <ClCompile Include="Graphics\GraphicLoader.cpp" />
     <ClCompile Include="Graphics\Mesh.cpp" />
+    <ClCompile Include="Graphics\RenderTarget.cpp" />
     <ClCompile Include="Graphics\SamplerState.cpp" />
     <ClCompile Include="Graphics\Texture.cpp" />
     <ClCompile Include="Logger.cpp" />

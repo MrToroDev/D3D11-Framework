@@ -6,13 +6,6 @@
 #include "ConstantBuffer.h"
 
 namespace DX {
-	enum class RenderType
-	{
-		RenderTarget,
-		DepthStencil // DO NOT USE, IT IS BUGGED NEED TO BE FIXED
-	};
-
-	template<RenderType T>
 	class RenderTarget
 	{
 	private:
@@ -40,7 +33,6 @@ namespace DX {
 		Mesh* targetQuad = nullptr;
 		ConstantBuffer<HDRData>* renderData;
 		DXGI_FORMAT textureFormat;
-		RenderType textureType;
 
 		void CreateTexture(ID3D11Device* dev, int width, int height, DXGI_FORMAT textureFormat);
 		void CreateDepthStencilBuffer(ID3D11Device* dev, int width, int height);
@@ -63,5 +55,3 @@ namespace DX {
 		void Draw(ID3D11DeviceContext* devcon);
 	};
 }
-
-#include "RenderTarget.inl"

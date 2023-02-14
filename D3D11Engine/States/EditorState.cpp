@@ -12,7 +12,7 @@ EditorState::EditorState(ApplicationDataRef data)
 void EditorState::init()
 {
 	showEditor = true;
-	_renderTarget = new DX::RenderTarget<DX::RenderType::RenderTarget>(
+	_renderTarget = new DX::RenderTarget(
 		_data->D3Dgraphic->getDevice().Get(), _data->D3Dgraphic->getDeviceContext().Get(),
 		500, 500, DX::to_wstring(_data->assetManager.GetShader("renderTarget")),
 		DXGI_FORMAT::DXGI_FORMAT_R16G16B16A16_FLOAT);

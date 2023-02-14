@@ -8,13 +8,11 @@
 #include <Console.h>
 #include <Logger.h>
 #include <iostream>
-#include <dxgidebug.h>
 #include <memory>
 #include <nlohmann/json.hpp>
 #include "Physics.h"
 #include <imgui.h>
 #include <imgui_impl_dx11.h>
-#include <imgui_impl_glfw.h>
 
 using json = nlohmann::json;
 
@@ -34,8 +32,10 @@ struct ApplicationData
 	json EditorSettings;
 	float FrameLimit;
 	bool vsync;
+	float TimeStep;
 
-	// Please do not modify those variables
+	// THESE VARIABLES ARE UPDATED IN THE APPLICATION LOOP
+
 	float FPS;
 	float CPU_TIME;
 	float GPU_TIME;
@@ -47,19 +47,14 @@ typedef std::shared_ptr<ApplicationData> ApplicationDataRef;
 class Application
 {
 private:
-	Microsoft::WRL::ComPtr<ID3D11Debug> debuglayer = nullptr;
-	Microsoft::WRL::ComPtr<ID3D11InfoQueue> debugInfo = nullptr;
-	Microsoft::WRL::ComPtr<IDXGIInfoQueue> dxgiDebugInfo = nullptr;
-	
 	ApplicationDataRef data = std::make_shared<ApplicationData>();
-	float dt, lasttime = 0;
+	float dt;
+	LARGE_INTEGER start_time, end_time, frequency;
 	ImGuiIO* io;
 
 	void InitWinGraphic(HINSTANCE hinstance);
 	void InitImgui();
 	void InitConfig();
-	void HandleDebugMessage();
-
 public:
 	Application(HINSTANCE hInstance);
 	~Application();

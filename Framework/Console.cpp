@@ -25,9 +25,18 @@ namespace DX
 
 	void Console::Draw(std::function<void()> commandCallback)
 	{
+		_DrawImGui(commandCallback);
+	}
+
+	void Console::Draw()
+	{
+		_DrawImGui([]() {});
+	}
+
+	void Console::_DrawImGui(std::function<void()> commandCallback)
+	{
 		int flags = ImGuiWindowFlags_::ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
-		ImGui::Begin("DebugConsole", (bool*)0, flags);
-		
+		ImGui::Begin("DebugConsole", (bool*)false, flags);
 		if (ImGui::BeginMenuBar()) {
 			if (ImGui::BeginMenu("File")) {
 				if (ImGui::MenuItem("Clear")) {
@@ -91,7 +100,7 @@ namespace DX
 
 			ImGui::EndTabBar();
 		}
-		
+
 		ImGui::End();
 	}
 }

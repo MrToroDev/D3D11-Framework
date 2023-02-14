@@ -29,26 +29,26 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -145,7 +145,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <None Include="Graphics\ConstantBuffer.inl" />
-    <None Include="Graphics\RenderTarget.inl" />
     <None Include="Memory.inl" />
   </ItemGroup>
   <ItemGroup>
@@ -153,7 +152,7 @@
     <ClCompile Include="..\lib source\imgui_demo.cpp" />
     <ClCompile Include="..\lib source\imgui_draw.cpp" />
     <ClCompile Include="..\lib source\imgui_impl_dx11.cpp" />
-    <ClCompile Include="..\lib source\imgui_impl_glfw.cpp" />
+    <ClCompile Include="..\lib source\imgui_impl_win32.cpp" />
     <ClCompile Include="..\lib source\imgui_tables.cpp" />
     <ClCompile Include="..\lib source\imgui_widgets.cpp" />
     <ClCompile Include="Audio\Listener.cpp" />
@@ -165,6 +164,7 @@
     <ClCompile Include="Graphics\Camera.cpp" />
     <ClCompile Include="Graphics\GraphicLoader.cpp" />
     <ClCompile Include="Graphics\Mesh.cpp" />
+    <ClCompile Include="Graphics\RenderTarget.cpp" />
     <ClCompile Include="Graphics\SamplerState.cpp" />
     <ClCompile Include="Graphics\Texture.cpp" />
     <ClCompile Include="Logger.cpp" />
@@ -172,10 +172,10 @@
     <ClCompile Include="Physics\RigidStatic.cpp" />
     <ClCompile Include="System\AssetManager.cpp" />
     <ClCompile Include="System\Math.cpp" />
+    <ClCompile Include="System\Timer.cpp" />
     <ClCompile Include="Utils\StateMachine.cpp" />
     <ClCompile Include="Utils\Utils.cpp" />
     <ClCompile Include="Window\Graphic.cpp" />
-    <ClCompile Include="Window\Joystick.cpp" />
     <ClCompile Include="Window\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -202,11 +202,11 @@
     <ClInclude Include="System\AssetManager.h" />
     <ClInclude Include="System\Config.h" />
     <ClInclude Include="System\Math.h" />
+    <ClInclude Include="System\Timer.h" />
     <ClInclude Include="Utils\StateMachine.h" />
     <ClInclude Include="Utils\States.h" />
     <ClInclude Include="Utils\Utils.h" />
     <ClInclude Include="Window\Graphic.h" />
-    <ClInclude Include="Window\Joystick.h" />
     <ClInclude Include="Window\Window.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

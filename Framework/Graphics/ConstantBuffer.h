@@ -17,14 +17,15 @@ namespace DX {
 		Microsoft::WRL::ComPtr<ID3D11Buffer> buffer;
 
 	public:
-		ConstantBuffer() {}
+		ConstantBuffer(ID3D11Device* device);
 		~ConstantBuffer();
+
+		void SetObjectName(const char name[256]);
 
 		T data;
 
 		ID3D11Buffer* Get()const;
 		ID3D11Buffer* const* GetAddressOf()const;
-		HRESULT Initialize(ID3D11Device* device);
 		void ApplyChanges(ID3D11DeviceContext* deviceContext);
 
 		void Bind(ID3D11DeviceContext* devcon, int count, ConstantBuffer_BindType type);

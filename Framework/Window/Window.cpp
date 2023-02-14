@@ -1,141 +1,201 @@
 #include "Window.h"
-#include <assert.h>
-#include <stb_image.h>
-#define GLFW_EXPOSE_NATIVE_WIN32
-#include <GLFW/glfw3native.h>
+#include "../Utils/Utils.h"
+#include <cassert>
 
-bool DX::Window::isfocusing = true;
-double DX::Window::xcpos = 0.0;
-double DX::Window::ycpos = 0.0;
-double DX::Window::lastX = 400.0;
-double DX::Window::lastY = 300.0;
-namespace DX {
-	bool firstMouse = true;
-}
+int DX::Window::width = 0;
+int DX::Window::height = 0;
 
-void DX::Window::FocusCallback(GLFWwindow* win, int focused) {
-	isfocusing = focused;
-}
-
-void DX::Window::CursorCallback(GLFWwindow* window, double x, double y)
+DX::Window::Window(HINSTANCE hInstance, const char* title, int width, int height, WindowDataInfo data)
+    : _instance(hInstance)
 {
-	if (firstMouse) {
-		lastX = x;
-		lastY = y;
-		firstMouse = false;
-	}
+	const wchar_t CLASS_NAME[] = L"_FRAMEWORK_WINDOW_CLASS";
+    WNDCLASSEXW winClass = {};
+    winClass.cbSize = sizeof(WNDCLASSEXW);
+    winClass.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
+    winClass.lpfnWndProc = &WindowProc;
+    winClass.hInstance = hInstance;
+    winClass.hCursor = LoadCursorW(0, IDC_ARROW);
+    winClass.lpszClassName = CLASS_NAME;
+    if (data.useIcon) {
 
-	if (isfocusing) {
-		double xoffset = x - lastX;
-		double yoffset = y - lastY;
-		lastX = x;
-		lastY = y;
+        // TODO: NEED FIX
 
-		xoffset *= 0.01f;
-		yoffset *= 0.01f;
+        HICON icon = (HICON)LoadImage( // returns a HANDLE so we have to cast to HICON
+            NULL,             // hInstance must be NULL when loading from a file
+            DX::to_wstring(data.iconFile).c_str(),   // the icon file name
+            IMAGE_ICON,       // specifies that the file is an icon
+            0,                // width of the image (we'll specify default later on)
+            0,                // height of the image
+            LR_LOADFROMFILE |  // we want to load a file (as opposed to a resource)
+            LR_DEFAULTSIZE);
 
-		xcpos = xoffset;
-		ycpos = yoffset;
-	}
-}
+        winClass.hIcon = LoadIcon(hInstance, IDI_QUESTION);
+        winClass.hIconSm = icon;
+    }
 
-DX::Window::Window(const char* title, int width, int height, bool resizable)
-{
-	if (!glfwInit()) {
-		MessageBoxA(NULL, "Error - GLFW_INIT. Cannot init glfw window library!", "Error", MB_OK | MB_ICONWARNING);
-		return;
-	}
-	//glfwWindowHint(GLFW_SCALE_TO_MONITOR, GLFW_FALSE);
-	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-	glfwWindowHint(GLFW_RESIZABLE, resizable);
-	window = glfwCreateWindow(width, height, title, nullptr, nullptr);
-	if (!window) {
-		MessageBoxA(NULL, "Error - GLFW_CREATE_WINDOW. Cannot create the window!", "Error", MB_OK | MB_ICONWARNING);
-		return;
-	}
-	glfwSetWindowFocusCallback(window, FocusCallback);
-	glfwSetCursorPosCallback(window, CursorCallback);
+    if (!RegisterClassEx(&winClass)) {
+        MessageBox(NULL, L"Cannot register the win32 class!", L"Framework Error", MB_OK | MB_ICONERROR);
+        return;
+    };
+
+    RECT initialRect = { 0, 0, width, height };
+    AdjustWindowRectEx(&initialRect, WS_OVERLAPPEDWINDOW, FALSE, WS_EX_OVERLAPPEDWINDOW);
+    LONG initialWidth = initialRect.right - initialRect.left;
+    LONG initialHeight = initialRect.bottom - initialRect.top;
+
+    hWnd = CreateWindowEx(
+        NULL,
+        winClass.lpszClassName,
+        DX::to_wstring(title).c_str(),
+        (!data.resizable) ? WS_OVERLAPPEDWINDOW ^ WS_MAXIMIZEBOX ^ WS_THICKFRAME : WS_OVERLAPPEDWINDOW,    // window style
+        300,    // x-position of the window
+        300,    // y-position of the window 
+        initialWidth,    // width of the window
+        initialHeight,    // height of the window
+        NULL,    // we have no parent window, NULL
+        NULL,    // we aren't using menus, NULL
+        hInstance,    // application handle
+        NULL);    // used with multiple windows, NULL)
+
+    if (hWnd == NULL) {
+        MessageBox(NULL, L"Cannot create the window!", L"Framework Error", MB_OK | MB_ICONERROR);
+        UnregisterClass(L"_FRAMEWORK_WINDOW_CLASS", _instance);
+        return;
+    }
+
+    ShowWindow(hWnd, SW_SHOW);
+
+    // ------------------------Direct Input Init------------------------
+    m_mouseX = 0;
+    m_mouseY = 0;
+    assert(SUCCEEDED(DirectInput8Create(hInstance, DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&m_directInput, NULL)));
+    assert(SUCCEEDED(m_directInput->CreateDevice(GUID_SysKeyboard, &m_keyboard, NULL)));
+    assert(SUCCEEDED(m_keyboard->SetDataFormat(&c_dfDIKeyboard)));
+    m_keyboard->Acquire();
+    assert(SUCCEEDED(m_directInput->CreateDevice(GUID_SysMouse, &m_mouse, NULL)));
+    assert(SUCCEEDED(m_mouse->SetDataFormat(&c_dfDIMouse)));
+    assert(SUCCEEDED(m_mouse->SetCooperativeLevel(hWnd, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE)));
+    m_mouse->Acquire();
+
+    isOpen = true;
 }
 
 DX::Window::~Window()
 {
-	glfwDestroyWindow(window);
-	glfwTerminate();
+    m_mouse->Unacquire();
+    m_mouse->Release();
+    m_keyboard->Unacquire();
+    m_keyboard->Release();
+    m_directInput->Release();
+    UnregisterClass(L"_FRAMEWORK_WINDOW_CLASS", _instance);
 }
 
 bool DX::Window::IsOpen()
 {
-	return !glfwWindowShouldClose(window);
+    return isOpen;
 }
 
-bool DX::Window::IsFocusing()
+void DX::Window::PoolEvents()
 {
-	return isfocusing;
-}
+    if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
 
-bool DX::Window::KeyPressed(int key)
-{
-	return glfwGetKey(window, key) == GLFW_PRESS;
-}
+        if (msg.message == WM_QUIT) {
+            isOpen = false;
+        }
+    }
 
-void DX::Window::Close()
-{
-	glfwSetWindowShouldClose(window, GLFW_TRUE);
-}
+    HRESULT result;
+    // Read the keyboard device.
+    result = m_keyboard->GetDeviceState(sizeof(m_keyboardState), (LPVOID)&m_keyboardState);
+    if (FAILED(result))
+    {
+        // If the keyboard lost focus or was not acquired then try to get control back.
+        if ((result == DIERR_INPUTLOST) || (result == DIERR_NOTACQUIRED))
+        {
+            m_keyboard->Acquire();
+        }
+    }
 
-void DX::Window::PollEvents()
-{
-	glfwPollEvents();
-}
+    result = m_mouse->GetDeviceState(sizeof(DIMOUSESTATE), (LPVOID)&m_mouseState);
+    if (FAILED(result))
+    {
+        // If the mouse lost focus or was not acquired then try to get control back.
+        if ((result == DIERR_INPUTLOST) || (result == DIERR_NOTACQUIRED))
+        {
+            m_mouse->Acquire();
+        }
+    }
 
-void DX::Window::SetIconImage(const char* file)
-{
-	int width, height, nrChannels;
-	unsigned char* data = stbi_load(file, &width, &height, &nrChannels, STBI_rgb_alpha);
-	assert((data) && " && Wrong type of format or (generally) wrong path!");
+    // Update the location of the mouse cursor based on the change of the mouse location during the frame.
+    m_mouseX += m_mouseState.lX;
+    m_mouseY += m_mouseState.lY;
 
-	GLFWimage image;
-	image.width = width;
-	image.height = height;
-	image.pixels = data;
-	glfwSetWindowIcon(window, 1, &image);
-}
+    // Ensure the mouse location doesn't exceed the screen width or height.
+    if (m_mouseX < 0) { m_mouseX = 0; }
+    if (m_mouseY < 0) { m_mouseY = 0; }
 
-void DX::Window::SetCursorEnable(bool cursor)
-{
-	glfwSetInputMode(window, GLFW_CURSOR, (cursor) ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
-}
-
-double DX::Window::GetCursorX()
-{
-	return xcpos;
-}
-
-double DX::Window::GetCursorY()
-{
-	return ycpos;
+    if (m_mouseX > width) { m_mouseX = width; }
+    if (m_mouseY > height) { m_mouseY = height; }
 }
 
 HWND DX::Window::GetHandle()
 {
-	return glfwGetWin32Window(window);
-}
-
-GLFWwindow* DX::Window::GetWindow()
-{
-	return window;
+    return hWnd;
 }
 
 int DX::Window::GetWidth()
 {
-	int w;
-	glfwGetWindowSize(window, &w, nullptr);
-	return w;
+    return width;
 }
 
 int DX::Window::GetHeight()
 {
-	int h;
-	glfwGetWindowSize(window, nullptr, &h);
-	return h;
+    return height;
+}
+
+void DX::Window::GetMousePosition(int& mouseX, int& mouseY)
+{
+    mouseX = m_mouseX;
+    mouseY = m_mouseY;
+}
+
+bool DX::Window::IsKeyPressed(unsigned int IDkey)
+{
+    // Do a bitwise and on the keyboard state to check if the escape key is currently being pressed.
+    if (m_keyboardState[IDkey] & 0x80)
+    {
+        return true;
+    }
+
+    return false;
+}
+
+extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+LRESULT DX::Window::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+    if (ImGui_ImplWin32_WndProcHandler(hwnd, uMsg, wParam, lParam)) return true;
+
+    switch (uMsg) {
+    case WM_DESTROY:
+        PostQuitMessage(0);
+        break;
+
+    case WM_SIZE:
+        int _width = LOWORD(lParam);  // Macro to get the low-order word.
+        int _height = HIWORD(lParam); // Macro to get the high-order word.
+
+        if (_width == 0 || _height == 0) { // Window Minimized
+            // do nothing, just wait to get window focus,
+            // so we use the last window size as a reference.
+            break;
+        }
+
+        width = _width;
+        height = _height;
+        break;
+    }
+
+    return DefWindowProc(hwnd, uMsg, wParam, lParam);
 }

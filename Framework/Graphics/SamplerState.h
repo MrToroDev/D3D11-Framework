@@ -17,6 +17,8 @@ namespace DX {
 					 D3D11_FILTER filter);
 		~SamplerState();
 
+		void SetObjectName(const char name[256]);
+
 		void Bind(Microsoft::WRL::ComPtr<ID3D11DeviceContext> devcon, int count);
 	};
 }

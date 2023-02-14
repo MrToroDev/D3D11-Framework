@@ -2,7 +2,10 @@
 template<typename T>
 inline void DX::Memory::Destroy(T object)
 {
-	if (object) object.Reset();
+	if (object) {
+		object.Reset();
+		object = nullptr;
+	}
 }
 
 template<DX::MemoryType type, typename T>

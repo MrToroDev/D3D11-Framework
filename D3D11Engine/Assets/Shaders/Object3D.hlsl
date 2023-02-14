@@ -43,11 +43,15 @@ struct PixelOutput
     float4 PixelColor : SV_Target0;
 };
 
+SamplerState st : register(s0);
+Texture2D tex : register(t0);
+
 PixelOutput PSMain(VSOutput input)
 {
     PixelOutput output;
     
-    output.PixelColor = float4(input.color, 1);
+    //output.PixelColor = float4(1.0, 0.0, 0.0, 1.0);
+    output.PixelColor = tex.Sample(st, input.uv);
     
     return output;
 }

@@ -1,37 +1,53 @@
 #pragma once
 
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
 #include <Windows.h>
-#include <GLFW/glfw3.h>
+
+#define DIRECTINPUT_VERSION 0x0800
+#pragma comment(lib, "dinput8.lib")
+#pragma comment(lib, "dxguid.lib")
+#include <dinput.h>
 
 namespace DX {
+	struct WindowDataInfo {
+		bool resizable;
+		const char* iconFile;
+		bool useIcon;
+	};
+
 	class Window
 	{
 	public:
-		Window(const char* title, int width, int height, bool resizable);
+		Window(HINSTANCE hInstance, const char* title, int width, int height, WindowDataInfo data);
 		~Window();
 
 		bool IsOpen();
-		bool IsFocusing();
-		bool KeyPressed(int key);
-		void Close();
-		void PollEvents();
-		void SetIconImage(const char* file);
-
-		void SetCursorEnable(bool cursor);
-		double GetCursorX();
-		double GetCursorY();
+		void PoolEvents();
 
 		HWND GetHandle();
-		GLFWwindow* GetWindow();
 		int GetWidth();
 		int GetHeight();
 
+		void GetMousePosition(int& mouseX, int& mouseY);
+
+		// USE DIK_XXX key as IDkey
+		bool IsKeyPressed(unsigned int IDkey);
+
 	private:
-		GLFWwindow* window;
-		static bool isfocusing;
-		static double xcpos, ycpos;
-		static double lastX, lastY;
-		static void FocusCallback(GLFWwindow* window, int focused);
-		static void CursorCallback(GLFWwindow* window, double x, double y);
+		IDirectInput8* m_directInput;
+		IDirectInputDevice8* m_keyboard;
+		IDirectInputDevice8* m_mouse;
+		unsigned char m_keyboardState[256];
+		DIMOUSESTATE m_mouseState;
+		int m_mouseX, m_mouseY;
+
+	private:
+		static LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+		static int width, height;
+		bool isOpen;
+		HINSTANCE _instance;
+		HWND hWnd;
+		MSG msg = {};
 	};
 }

@@ -20,25 +20,27 @@ namespace DX
 		bool isVertexRawFloat = false;
 
 	private:
-		void initShaders(Microsoft::WRL::ComPtr<ID3D11Device> dev, std::wstring p, std::wstring v, std::string vmain, std::string pmain);
-		void initBuffer(Microsoft::WRL::ComPtr<ID3D11Device> dev, std::vector<VertexTexture> v, std::vector<int> indices);
-		void initBuffer(Microsoft::WRL::ComPtr<ID3D11Device> dev, float* v, std::vector<int> indices);
-		void initInputLayout(Microsoft::WRL::ComPtr<ID3D11Device> dev);
-		void initInputLayout_V(Microsoft::WRL::ComPtr<ID3D11Device> dev);
+		void initShaders(ID3D11Device* dev, std::wstring p, std::wstring v, std::string vmain, std::string pmain);
+		void initBuffer(ID3D11Device* dev, std::vector<VertexTexture> v, std::vector<int> indices);
+		void initBuffer(ID3D11Device* dev, float* v, std::vector<int> indices);
+		void initInputLayout(ID3D11Device* dev);
+		void initInputLayout_V(ID3D11Device* dev);
 
 	public:
 		Mesh(
-			Microsoft::WRL::ComPtr<ID3D11Device> dev,
+			ID3D11Device* dev,
 			std::wstring ShaderFile, std::string psmain, std::string vsmain,
 			std::vector<VertexTexture> v, std::vector<int> indices);
 		Mesh(
-			Microsoft::WRL::ComPtr<ID3D11Device> dev,
+			ID3D11Device* dev,
 			std::wstring ShaderFile, std::string psmain, std::string vsmain,
 			float* v, std::vector<int> indices);
 
+		void SetObjectName(const char name[256]);
+
 		~Mesh();
 
-		void prepareDraw(Microsoft::WRL::ComPtr<ID3D11DeviceContext> devcon);
-		void Draw(Microsoft::WRL::ComPtr<ID3D11DeviceContext> devcon, int vertCount);
+		void prepareDraw(ID3D11DeviceContext* devcon);
+		void Draw(ID3D11DeviceContext* devcon, int vertCount);
 	};
 }

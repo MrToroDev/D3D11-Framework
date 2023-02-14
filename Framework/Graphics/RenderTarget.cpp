@@ -1,8 +1,9 @@
 #include "../COMException.h"
+#include "../Utils/Utils.h"
+#include "../Memory.h"
 #include "RenderTarget.h"
 
-template<DX::RenderType T>
-void DX::RenderTarget<T>::CreateTexture(Microsoft::WRL::ComPtr<ID3D11Device> dev, int width, int height, DXGI_FORMAT textureFormat)
+void DX::RenderTarget::CreateTexture(ID3D11Device* dev, int width, int height, DXGI_FORMAT textureFormat)
 {
     D3D11_TEXTURE2D_DESC dsDesc = {};
     D3D11_RENDER_TARGET_VIEW_DESC renderTargetViewDesc = {};
@@ -54,8 +55,7 @@ void DX::RenderTarget<T>::CreateTexture(Microsoft::WRL::ComPtr<ID3D11Device> dev
     DX_CHECK(dev->CreateSamplerState(&samplerDesc, textureST.GetAddressOf()));
 }
 
-template<DX::RenderType T>
-void DX::RenderTarget<T>::CreateDepthStencilBuffer(Microsoft::WRL::ComPtr<ID3D11Device> dev, int width, int height)
+void DX::RenderTarget::CreateDepthStencilBuffer(ID3D11Device* dev, int width, int height)
 {
     D3D11_TEXTURE2D_DESC dsDesc = {};
     dsDesc.Width = width;
@@ -92,29 +92,23 @@ void DX::RenderTarget<T>::CreateDepthStencilBuffer(Microsoft::WRL::ComPtr<ID3D11
     DX_CHECK(dev->CreateDepthStencilState(&depthStencilDesc, depthStencilState.GetAddressOf()));
 }
 
-template<DX::RenderType T>
-DX::RenderTarget<T>::RenderTarget(Microsoft::WRL::ComPtr<ID3D11Device> dev, Microsoft::WRL::ComPtr<ID3D11DeviceContext> devcon, int width, int height, std::wstring shader, DXGI_FORMAT tFormat)
+DX::RenderTarget::RenderTarget(ID3D11Device* dev, ID3D11DeviceContext* devcon, int width, int height, std::wstring shader, DXGI_FORMAT tFormat)
 {
     std::vector<VertexTexture> v = {
         VertexTexture(-1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f),
         VertexTexture(1.0f, -1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f),
         VertexTexture(-1.0f,  1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f),
-        VertexTexture( 1.0f,  1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f),
+        VertexTexture(1.0f,  1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f),
     };
     std::vector<int> i = {
         0, 1, 2,
         2, 3, 1
     };
     textureFormat = tFormat;
-    if (T == DX::RenderType::RenderTarget) {
-        targetQuad = new Mesh(dev, shader, "PS_RenderTarget", "VS_RenderTarget", v, i);
-    }
-    else {
-        targetQuad = new Mesh(dev, shader, "PS_RenderTarget_Depth", "VS_RenderTarget", v, i);
-    }
-    renderData.Initialize(dev.Get());
-    textureType = T;
-    if (T == DX::RenderType::RenderTarget) CreateTexture(dev, width, height, textureFormat);
+    
+    targetQuad = new Mesh(dev, shader, "PS_RenderTarget", "VS_RenderTarget", v, i);
+    renderData = new ConstantBuffer<HDRData>(dev);
+    CreateTexture(dev, width, height, textureFormat);
     CreateDepthStencilBuffer(dev, width, height);
 
     D3D11_RASTERIZER_DESC rsDesc = {};
@@ -150,100 +144,109 @@ DX::RenderTarget<T>::RenderTarget(Microsoft::WRL::ComPtr<ID3D11Device> dev, Micr
     DX_CHECK(dev->CreateBlendState(&blendDesc, blendState.GetAddressOf()));
 }
 
-template<DX::RenderType T>
-DX::RenderTarget<T>::~RenderTarget()
+DX::RenderTarget::~RenderTarget()
 {
-    if (T == DX::RenderType::RenderTarget && backbuffer) backbuffer.Reset();
-    if (T == DX::RenderType::RenderTarget && backbufferSRV) backbufferSRV.Reset();
-    if (T == DX::RenderType::RenderTarget && backbufferTexture) backbufferTexture.Reset();
-    if (depthStencilBuffer) depthStencilBuffer.Reset();
-    if (depthStencilState) depthStencilState.Reset();
-    if (depthStencilView) depthStencilView.Reset();
-    if (T == DX::RenderType::RenderTarget && textureST) textureST.Reset();
+    Memory::Destroy(backbuffer);
+    Memory::Destroy(backbufferSRV);
+    Memory::Destroy(backbufferTexture);
+    Memory::Destroy(depthStencilBuffer);
+    Memory::Destroy(depthStencilState);
+    Memory::Destroy(depthStencilView);
+    Memory::Destroy(textureST);
     delete targetQuad;
-    if (rasterizerState) rasterizerState.Reset();
-    if (blendState) blendState.Reset();
+    Memory::Destroy(rasterizerState);
+    Memory::Destroy(blendState);
+    Memory::Destroy(renderData);
 }
 
-template<DX::RenderType T>
-Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> DX::RenderTarget<T>::GetTextureSRV()
+void DX::RenderTarget::SetObjectName(const char name[256])
 {
-    if (T == DX::RenderType::RenderTarget) {
-        return backbufferSRV;
-    }
-    /*else {
-        return depthStencilBuffer;
-    }*/
+    char n[256];
+    sprintf_s(n, "%s_Backbuffer", name);
+    SetDebugObjectName(backbuffer.Get(), n);
+    sprintf_s(n, "%s_BackbufferSRV", name);
+    SetDebugObjectName(backbufferSRV.Get(), n);
+    sprintf_s(n, "%s_BackbufferTexture", name);
+    SetDebugObjectName(backbufferTexture.Get(), n);
+    sprintf_s(n, "%s_DepthStencilBuffer", name);
+    SetDebugObjectName(depthStencilBuffer.Get(), n);
+    sprintf_s(n, "%s_DepthStencilState", name);
+    SetDebugObjectName(depthStencilState.Get(), n);
+    sprintf_s(n, "%s_DepthStencilView", name);
+    SetDebugObjectName(depthStencilView.Get(), n);
+    sprintf_s(n, "%s_Texture", name);
+    SetDebugObjectName(textureST.Get(), n);
+    sprintf_s(n, "%s_RasterizerState", name);
+    SetDebugObjectName(rasterizerState.Get(), n);
+    sprintf_s(n, "%s_BlendState", name);
+    SetDebugObjectName(blendState.Get(), n);
 }
 
-template<DX::RenderType T>
-void DX::RenderTarget<T>::SetConstantBufferData(Microsoft::WRL::ComPtr<ID3D11DeviceContext> devcon, bool hdr, float hdrExposure, float gamma, bool mosaic, float mosaicStrenght, float clock)
+Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> DX::RenderTarget::GetTextureSRV()
 {
-    renderData.data.hdr = hdr;
-    renderData.data.exposure = hdrExposure;
-    renderData.data.gamma = gamma;
-    renderData.data.mosaic = mosaic;
-    renderData.data.mosaicStrong = mosaicStrenght;
-    renderData.data.clock = clock;
-    renderData.ApplyChanges(devcon.Get());
+    return backbufferSRV;
 }
 
-template<DX::RenderType T>
-void DX::RenderTarget<T>::Clear(Microsoft::WRL::ComPtr<ID3D11DeviceContext> devcon, float color[4])
+void DX::RenderTarget::SetConstantBufferData(ID3D11DeviceContext* devcon, bool hdr, float hdrExposure, float gamma, bool mosaic, float mosaicStrenght, float clock)
 {
-    if (T == DX::RenderType::RenderTarget) devcon->ClearRenderTargetView(backbuffer.Get(), color);
+    renderData->data.hdr = hdr;
+    renderData->data.exposure = hdrExposure;
+    renderData->data.gamma = gamma;
+    renderData->data.mosaic = mosaic;
+    renderData->data.mosaicStrong = mosaicStrenght;
+    renderData->data.clock = clock;
+    renderData->ApplyChanges(devcon);
+}
+
+void DX::RenderTarget::Clear(ID3D11DeviceContext* devcon, float color[4])
+{
+    devcon->ClearRenderTargetView(backbuffer.Get(), color);
     devcon->ClearDepthStencilView(depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 }
 
-template<DX::RenderType T>
-void DX::RenderTarget<T>::SetRenderTarget(Microsoft::WRL::ComPtr<ID3D11Device> dev, Microsoft::WRL::ComPtr<ID3D11DeviceContext> devcon, int width, int height)
+void DX::RenderTarget::SetRenderTarget(ID3D11Device* dev, ID3D11DeviceContext* devcon, int width, int height)
 {
-    if (T == DX::RenderType::RenderTarget)backbuffer.Reset();
-    if (T == DX::RenderType::RenderTarget)backbufferTexture.Reset();
-    if (T == DX::RenderType::RenderTarget)backbufferSRV.Reset();
-    if (T == DX::RenderType::RenderTarget)textureST.Reset();
+    backbuffer.Reset();
+    backbufferTexture.Reset();
+    backbufferSRV.Reset();
+    textureST.Reset();
     depthStencilBuffer.Reset();
     depthStencilState.Reset();
     depthStencilView.Reset();
 
-    if (T == DX::RenderType::RenderTarget)CreateTexture(dev, width, height, textureFormat);
+    CreateTexture(dev, width, height, textureFormat);
     CreateDepthStencilBuffer(dev, width, height);
 
     devcon->OMSetDepthStencilState(this->depthStencilState.Get(), 0);
-    if (T == DX::RenderType::RenderTarget) {
         devcon->OMSetRenderTargets( // Set Render Target
             1,
             backbuffer.GetAddressOf(),
             depthStencilView.Get());
         devcon->RSSetState(rasterizerState.Get());
-    }
+    
 }
 
-template<DX::RenderType T>
-inline void DX::RenderTarget<T>::SetBlendState(Microsoft::WRL::ComPtr<ID3D11DeviceContext> devcon, float blendFactor[4])
+void DX::RenderTarget::SetBlendState(ID3D11DeviceContext* devcon, float blendFactor[4])
 {
     devcon->OMSetBlendState(blendState.Get(), blendFactor, 0xffffffff);
 }
 
-template<DX::RenderType T>
-inline void DX::RenderTarget<T>::UnBoundBlendState(Microsoft::WRL::ComPtr<ID3D11DeviceContext> devcon)
+void DX::RenderTarget::UnBoundBlendState(ID3D11DeviceContext* devcon)
 {
     devcon->OMSetBlendState(nullptr, nullptr, 0xffffffff);
 }
 
-template<DX::RenderType T>
-inline void DX::RenderTarget<T>::UnBoundTarget(Microsoft::WRL::ComPtr<ID3D11DeviceContext> devcon)
+void DX::RenderTarget::UnBoundTarget(ID3D11DeviceContext* devcon)
 {
-    if (T == DX::RenderType::RenderTarget) devcon->OMSetRenderTargets(0, nullptr, nullptr);
+    devcon->OMSetRenderTargets(0, nullptr, nullptr);
     devcon->OMSetDepthStencilState(nullptr, 0);
 }
 
-template<DX::RenderType T>
-void DX::RenderTarget<T>::Draw(Microsoft::WRL::ComPtr<ID3D11DeviceContext> devcon)
+void DX::RenderTarget::Draw(ID3D11DeviceContext* devcon)
 {
     targetQuad->prepareDraw(devcon);
     devcon->PSSetShaderResources(0, 1, backbufferSRV.GetAddressOf());
     devcon->PSSetSamplers(0, 1, textureST.GetAddressOf());
-    renderData.Bind(devcon.Get(), 0, ConstantBuffer_BindType::PixelShader);
+    renderData->Bind(devcon, 0, ConstantBuffer_BindType::PixelShader);
     targetQuad->Draw(devcon, 6);
 }

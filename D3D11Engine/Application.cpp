@@ -19,16 +19,16 @@ void Application::InitWinGraphic(HINSTANCE hinstance)
 
 	data->window = new DX::Window(
 		hinstance, APP_NAME, 
-		data->GraphicSettings["Window"]["width"],
-		data->GraphicSettings["Window"]["height"],
+		data->GraphicSettings.get_integer("Video", "width"),
+		data->GraphicSettings.get_integer("Video", "height"),
 		wInfo
 	);
 	DX::LogInfo("Window Created!");
 
-	data->D3Dgraphic = new DX::Graphic(data->window, data->GraphicSettings["Window"]["fullscreen"]);
+	data->D3Dgraphic = new DX::Graphic(data->window, data->GraphicSettings.get_bool("Video", "fullscreen"));
 	DX::LogInfo("Graphic Initialized! {DXGI - D3D11}");
 
-	data->vsync = data->GraphicSettings["Graphic"]["vsync"];
+	data->vsync = data->GraphicSettings.get_bool("Graphics", "vsync");
 	data->STmachine.AddState(DX::StatesRef(new EditorState(data)));
 }
 
@@ -65,51 +65,8 @@ void Application::InitImgui()
 
 void Application::InitConfig()
 {
-	{
-		std::ifstream graphicFile("Settings/Graphics.json");
-		if (graphicFile.good() && graphicFile.is_open()) {
-			try {
-				data->GraphicSettings = json::parse(graphicFile);
-			}
-			catch (json::parse_error& err) {
-				DX::LogWarning("JSON PARSER error at byte " + std::to_string(err.byte) + " | id " + std::to_string(err.id));
-			}
-		}
-		else {
-			DX::LogWarning("There is no Graphic settings file!");
-		}
-		graphicFile.close();
-	}
-	{
-		std::ifstream File("Settings/Audio.json");
-		if (File.good() && File.is_open()) {
-			try {
-				data->AudioSettings = json::parse(File);
-			}
-			catch (json::parse_error& err) {
-				DX::LogWarning("JSON PARSER error at byte " + std::to_string(err.byte) + " | id " + std::to_string(err.id));
-			}
-		}
-		else {
-			DX::LogWarning("There is no audio settings file!");
-		}
-		File.close();
-	}
-	{
-		std::ifstream File("Settings/Editor.json");
-		if (File.good() && File.is_open()) {
-			try {
-				data->EditorSettings = json::parse(File);
-			}
-			catch (json::parse_error& err) {
-				DX::LogWarning("JSON PARSER error at byte " + std::to_string(err.byte) + " | id " + std::to_string(err.id));
-			}
-		}
-		else {
-			DX::LogWarning("There is no audio settings file!");
-		}
-		File.close();
-	}
+	data->GraphicSettings.OpenFile("Settings/DefaultGraphicSettings.ini");
+
 	DX::LogInfo("Config File loaded correctly!");
 }
 
@@ -120,7 +77,7 @@ Application::Application(HINSTANCE hInstance)
 		InitWinGraphic(hInstance);
 		InitImgui();
 		data->physicWorld.Initialize(-9.81f);
-		data->FrameLimit = data->GraphicSettings["Graphic"]["fpsLimit"];
+		data->FrameLimit = data->GraphicSettings.get_float("Graphics", "fps");
 #if defined(_DEBUG)
 		DX::LogWarning("THIS VERSION OF THE APPLICATION IS IN DEBUG MODE! This mean that the Application could have bugs.");
 #endif
@@ -137,16 +94,6 @@ Application::Application(HINSTANCE hInstance)
 
 Application::~Application()
 {
-	// Set the changed Settings before closing the app
-	data->GraphicSettings["Window"]["width"] = data->window->GetWidth();
-	data->GraphicSettings["Window"]["height"] = data->window->GetHeight();
-	data->GraphicSettings["Window"]["fullscreen"] = data->D3Dgraphic->isFullscreen();
-	data->GraphicSettings["Graphic"]["vsync"] = data->vsync;
-	data->GraphicSettings["Graphic"]["fpsLimit"] = data->FrameLimit;
-	std::fstream graphicFile("Settings/Graphics.json", std::ios::out | std::ios::trunc);
-	graphicFile << data->GraphicSettings;
-	graphicFile.close();
-
 	data->D3Dgraphic->ClearStateFlush();
 
 	DX::LogInfo("Shutting Down ImGui...");

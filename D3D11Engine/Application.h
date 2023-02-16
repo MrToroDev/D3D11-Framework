@@ -4,6 +4,7 @@
 #include <Window/Window.h>
 #include <Window/Graphic.h>
 #include <System/AssetManager.h>
+#include <System/ConfigFile.h>
 #include <Utils/StateMachine.h>
 #include <Console.h>
 #include <Logger.h>
@@ -27,9 +28,9 @@ struct ApplicationData
 	PhysicWorld physicWorld;
 	
 	// Options files
-	json GraphicSettings;
-	json AudioSettings;
-	json EditorSettings;
+	DX::ConfigFile GraphicSettings;
+	DX::ConfigFile AudioSettings;
+	DX::ConfigFile EditorSettings;
 	float FrameLimit;
 	bool vsync;
 	float TimeStep;

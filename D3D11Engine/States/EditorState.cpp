@@ -46,7 +46,7 @@ void EditorState::init()
 	plane->SetObjectName("plane");
 	billboard = new DX::Mesh(_data->D3Dgraphic->getDevice().Get(), DX::to_wstring(_data->assetManager.GetShader("billboard")), "PS", "VS", plane_v, plane_i);
 	billboard->SetObjectName("billboard");
-	billboard_texture = new DX::Texture(_data->assetManager.GetTexture("dximage").c_str(), _data->D3Dgraphic->getDevice());
+	billboard_texture = new DX::Texture(_data->assetManager.GetTexture("dximage").c_str(), _data->D3Dgraphic->getDevice().Get());
 }
 
 void EditorState::update(float dt)
@@ -117,7 +117,7 @@ void EditorState::draw()
 
 	mesh_test->prepareDraw(_data->D3Dgraphic->getDeviceContext().Get());
 	sampler->Bind(_data->D3Dgraphic->getDeviceContext(), 0);
-	billboard_texture->Bind(_data->D3Dgraphic->getDeviceContext(), 0);
+	billboard_texture->Bind(_data->D3Dgraphic->getDeviceContext().Get(), 0);
 	cbuffer_Cube->Bind(_data->D3Dgraphic->getDeviceContext().Get(), 0, DX::ConstantBuffer_BindType::VertexShader);
 	mesh_test->Draw(_data->D3Dgraphic->getDeviceContext().Get(), 36);
 

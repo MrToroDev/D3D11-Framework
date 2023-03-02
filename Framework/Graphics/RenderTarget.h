@@ -2,6 +2,7 @@
 
 #include <wrl.h>
 #include <d3d11.h>
+#include "../Window/Graphic.h"
 #include "Mesh.h"
 #include "ConstantBuffer.h"
 
@@ -25,8 +26,8 @@ namespace DX {
 		Microsoft::WRL::ComPtr<ID3D11Texture2D> backbufferTexture = nullptr;
 		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> backbufferSRV = nullptr;
 		Microsoft::WRL::ComPtr<ID3D11DepthStencilView> depthStencilView = nullptr;
-		Microsoft::WRL::ComPtr<ID3D11DepthStencilState> depthStencilState = nullptr;
 		Microsoft::WRL::ComPtr<ID3D11Texture2D> depthStencilBuffer = nullptr;
+		D3D11_DEPTH_STENCIL_DESC depthStencilDesc;
 		Microsoft::WRL::ComPtr<ID3D11SamplerState> textureST = nullptr;
 		Microsoft::WRL::ComPtr<ID3D11RasterizerState> rasterizerState = nullptr;
 		Microsoft::WRL::ComPtr<ID3D11BlendState> blendState = nullptr;

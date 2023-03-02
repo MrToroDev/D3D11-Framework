@@ -4,6 +4,26 @@
 
 namespace DX
 {
+    enum class DepthStencilMode
+    {
+        Off,
+        Write, // Stencil
+        Mask, // Stencil
+        DepthOff,
+        DepthOn,
+        DepthReversed,
+        DepthFirst, // for skybox render
+    };
+
+    enum class PrimitiveMode
+    {
+        Triangle,
+        Line,
+        Point,
+        Undefined
+    };
+
+
     using Position = DirectX::XMFLOAT3;
     using Color = DirectX::XMFLOAT3;
     using Texcoord = DirectX::XMFLOAT2;
@@ -34,6 +54,8 @@ namespace DX
 
     struct Pixel
     {
+        Pixel(float _r, float _g, float _b, float _a) : r(_r), g(_g), b(_b), a(_a) {}
+
         float r, g, b, a;
     };
 }

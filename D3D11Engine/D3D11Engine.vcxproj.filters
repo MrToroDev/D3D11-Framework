@@ -27,6 +27,9 @@
     <ClCompile Include="Physics.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
+    <ClCompile Include="States\TestsState.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h">
@@ -41,8 +44,12 @@
     <ClInclude Include="Physics.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
+    <ClInclude Include="States\TestsState.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Models\Cube.mesh" />
+    <None Include="Assets\Models\Test.mesh" />
   </ItemGroup>
 </Project>

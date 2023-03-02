@@ -240,12 +240,25 @@ DX::Mesh::~Mesh()
     Memory::Destroy(this->Ibuffer);
 }
 
-void DX::Mesh::prepareDraw(ID3D11DeviceContext* devcon)
+void DX::Mesh::Draw(ID3D11DeviceContext* devcon, int vertCount, PrimitiveMode mode)
 {
     UINT vertexOffset = 0;
     UINT vertexStride;
     if (!isVertexRawFloat) vertexStride = sizeof(DX::VertexTexture);
     else vertexStride = 11 * 4; // stride = (vertex_size + uv_size + normal_size + color_size) * float_byte_size;
+
+    switch (mode)
+    {
+    case PrimitiveMode::Triangle:
+        devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+        break;
+    case PrimitiveMode::Line:
+        devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+        break;
+    case PrimitiveMode::Point:
+        devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
+        break;
+    }
 
     devcon->IASetInputLayout(inputLayout.Get());
     devcon->IASetVertexBuffers(
@@ -255,9 +268,8 @@ void DX::Mesh::prepareDraw(ID3D11DeviceContext* devcon)
         &vertexStride,
         &vertexOffset);
     devcon->IASetIndexBuffer(
-       Ibuffer.Get(), DXGI_FORMAT::DXGI_FORMAT_R32_UINT, vertexOffset
+        Ibuffer.Get(), DXGI_FORMAT::DXGI_FORMAT_R32_UINT, vertexOffset
     );
-    devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     devcon->VSSetShader(
         vertexShader.Get(),
         nullptr,
@@ -266,9 +278,5 @@ void DX::Mesh::prepareDraw(ID3D11DeviceContext* devcon)
         pixelShader.Get(),
         nullptr,
         0);
-}
-
-void DX::Mesh::Draw(ID3D11DeviceContext* devcon, int vertCount)
-{
     devcon->DrawIndexed(vertCount, 0, 0);
 }

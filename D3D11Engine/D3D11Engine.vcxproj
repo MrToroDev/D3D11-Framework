@@ -158,15 +158,18 @@
     <ClCompile Include="States\EditorState.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Physics.cpp" />
+    <ClCompile Include="States\TestsState.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h" />
     <ClInclude Include="Definitions.h" />
     <ClInclude Include="States\EditorState.h" />
     <ClInclude Include="Physics.h" />
+    <ClInclude Include="States\TestsState.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Models\Cube.mesh" />
+    <None Include="Assets\Models\Test.mesh" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

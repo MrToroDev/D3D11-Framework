@@ -33,6 +33,8 @@ private:
 	};
 
 private:
+	bool isLineList, isTriangleList, isPointList;
+
 	CubeTransform _cubeT;
 	bool showEditor;
 	bool UpdateViewport;
@@ -43,7 +45,6 @@ private:
 	DX::Camera camera;
 	DX::Mesh* mesh_test;
 	DX::Mesh* billboard;
-	DX::Mesh* plane;
 	DX::SamplerState* sampler;
 	DX::Texture* billboard_texture;
 	DirectX::DX11::SpriteBatch* spriteBatch;

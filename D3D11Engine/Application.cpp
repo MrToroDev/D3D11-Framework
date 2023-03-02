@@ -4,7 +4,8 @@
 #include <filesystem>
 #include <COMException.h>
 #include <Utils/Utils.h>
-#include "States/EditorState.h"
+//#include "States/EditorState.h"
+#include "States/TestsState.h"
 #include <time.h>
 #include <imgui_impl_win32.h>
 
@@ -29,7 +30,7 @@ void Application::InitWinGraphic(HINSTANCE hinstance)
 	DX::LogInfo("Graphic Initialized! {DXGI - D3D11}");
 
 	data->vsync = data->GraphicSettings.get_bool("Graphics", "vsync");
-	data->STmachine.AddState(DX::StatesRef(new EditorState(data)));
+	data->STmachine.AddState(DX::StatesRef(new TestsState(data)));
 }
 
 void Application::InitImgui()

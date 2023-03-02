@@ -3,6 +3,7 @@
 #include "../COMException.h"
 #include "../Memory.h"
 #include "../Utils/Utils.h"
+#include "../Graphics/Vertex.h"
 #include <string>
 #include <sstream>
 #include <assert.h>
@@ -33,13 +34,7 @@ void DX::Graphic::CreateDepthStencilBuffer(int width, int height)
     DX_CHECK(this->dev->CreateTexture2D(&dsDesc, nullptr, depthStencilBuffer.GetAddressOf()));
     DX_CHECK(this->dev->CreateDepthStencilView(depthStencilBuffer.Get(), nullptr, depthStencilView.GetAddressOf()));
 
-    D3D11_DEPTH_STENCIL_DESC DSDesc;
-    ZeroMemory(&DSDesc, sizeof(D3D11_DEPTH_STENCIL_DESC));
-    DSDesc.DepthEnable = true;
-    DSDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK::D3D11_DEPTH_WRITE_MASK_ALL;
-    DSDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
-
-    DX_CHECK(this->dev->CreateDepthStencilState(&DSDesc, depthStencilState.GetAddressOf()));
+    DX_CHECK(this->dev->CreateDepthStencilState(&depthStencilDesc, depthStencilState.GetAddressOf()));
 }
 
 void Graphic::CreateSwapChain()
@@ -312,6 +307,9 @@ Graphic::Graphic(Window* win, bool fullscreen)
     qDesc.Query = D3D11_QUERY::D3D11_QUERY_TIMESTAMP_DISJOINT;
     DX_CHECK(dev->CreateQuery(&qDesc, disjoinQuery.GetAddressOf()));
 
+    depthStencilDesc.DepthEnable = true;
+    depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK::D3D11_DEPTH_WRITE_MASK_ALL;
+    depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
     this->CreateDepthStencilBuffer(winRef->GetWidth(), winRef->GetHeight());
     CreateSwapChain();
     swapchain->SetFullscreenState(fullscreen, nullptr);
@@ -468,6 +466,58 @@ void DX::Graphic::ClearStateFlush()
 {
     devcon->Flush();
     devcon->ClearState();
+}
+
+void DX::Graphic::SetDepthStencilMode(DepthStencilMode mode)
+{
+    depthStencilState.Reset();
+    if (mode == DepthStencilMode::Write)
+    {
+        depthStencilDesc.DepthEnable = FALSE;
+        depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+        depthStencilDesc.StencilEnable = TRUE;
+        depthStencilDesc.StencilWriteMask = 0xFF;
+        depthStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+        depthStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_REPLACE;
+    }
+    else if (mode == DepthStencilMode::Mask)
+    {
+        depthStencilDesc.DepthEnable = FALSE;
+        depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+        depthStencilDesc.StencilEnable = TRUE;
+        depthStencilDesc.StencilReadMask = 0xFF;
+        depthStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_NOT_EQUAL;
+        depthStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+    }
+    else if (mode == DepthStencilMode::DepthOff)
+    {
+        depthStencilDesc.DepthEnable = FALSE;
+        depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+    }
+    else if (mode == DepthStencilMode::DepthOn)
+    {
+        depthStencilDesc.DepthEnable = true;
+        depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK::D3D11_DEPTH_WRITE_MASK_ALL;
+        depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
+    }
+    else if (mode == DepthStencilMode::DepthReversed)
+    {
+        depthStencilDesc.DepthFunc = D3D11_COMPARISON_GREATER;
+    }
+    else if (mode == DepthStencilMode::DepthFirst)
+    {
+        depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
+        depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+    }
+    DX_CHECK(this->dev->CreateDepthStencilState(&depthStencilDesc, depthStencilState.GetAddressOf()));
+    devcon->OMSetDepthStencilState(this->depthStencilState.Get(), 0);
+}
+
+void DX::Graphic::SetPrimitiveMode(PrimitiveMode mode)
+{
+    if (mode == PrimitiveMode::Triangle) devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    else if (mode == PrimitiveMode::Line) devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+    else if (mode == PrimitiveMode::Point) devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
 }
 
 bool DX::Graphic::isFullscreen() const

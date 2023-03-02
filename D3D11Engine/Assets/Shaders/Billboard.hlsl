@@ -13,10 +13,9 @@ struct PSInput
 
 cbuffer CameraData : register(b0)
 {
-    matrix worldPos;
     matrix projection;
     matrix view;
-    vector position;
+    matrix worldPos;
 }
 
 PSInput VS(VSInput input)
@@ -34,5 +33,6 @@ SamplerState sampler0 : register(s0);
 
 float4 PS(PSInput input) : SV_Target
 {
-    return texture0.Sample(sampler0, input.uv);
+    //return texture0.Sample(sampler0, input.uv);
+    return float4(1, 0, 0, 1);
 }

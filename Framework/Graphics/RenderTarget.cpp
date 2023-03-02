@@ -72,24 +72,6 @@ void DX::RenderTarget::CreateDepthStencilBuffer(ID3D11Device* dev, int width, in
 
     DX_CHECK(dev->CreateTexture2D(&dsDesc, nullptr, depthStencilBuffer.GetAddressOf()));
     DX_CHECK(dev->CreateDepthStencilView(depthStencilBuffer.Get(), nullptr, depthStencilView.GetAddressOf()));
-
-    D3D11_DEPTH_STENCIL_DESC depthStencilDesc = {};
-    depthStencilDesc.DepthEnable = true;
-    depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
-    depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK::D3D11_DEPTH_WRITE_MASK_ALL;
-    depthStencilDesc.StencilEnable = false;
-    depthStencilDesc.StencilReadMask = D3D11_DEFAULT_STENCIL_READ_MASK;
-    depthStencilDesc.StencilWriteMask = D3D11_DEFAULT_STENCIL_WRITE_MASK;
-    D3D11_DEPTH_STENCILOP_DESC sD = {
-        D3D11_STENCIL_OP_KEEP,
-        D3D11_STENCIL_OP_KEEP,
-        D3D11_STENCIL_OP_KEEP,
-        D3D11_COMPARISON_ALWAYS
-    };
-    depthStencilDesc.FrontFace = sD;
-    depthStencilDesc.BackFace = sD;
-
-    DX_CHECK(dev->CreateDepthStencilState(&depthStencilDesc, depthStencilState.GetAddressOf()));
 }
 
 DX::RenderTarget::RenderTarget(ID3D11Device* dev, ID3D11DeviceContext* devcon, int width, int height, std::wstring shader, DXGI_FORMAT tFormat)
@@ -113,7 +95,7 @@ DX::RenderTarget::RenderTarget(ID3D11Device* dev, ID3D11DeviceContext* devcon, i
 
     D3D11_RASTERIZER_DESC rsDesc = {};
     rsDesc.FillMode = D3D11_FILL_MODE::D3D11_FILL_SOLID;
-    rsDesc.CullMode = D3D11_CULL_MODE::D3D11_CULL_NONE;
+    rsDesc.CullMode = D3D11_CULL_MODE::D3D11_CULL_BACK;
     rsDesc.FrontCounterClockwise = false;
     rsDesc.DepthBias = false;
     rsDesc.DepthBiasClamp = 0;
@@ -150,7 +132,6 @@ DX::RenderTarget::~RenderTarget()
     Memory::Destroy(backbufferSRV);
     Memory::Destroy(backbufferTexture);
     Memory::Destroy(depthStencilBuffer);
-    Memory::Destroy(depthStencilState);
     Memory::Destroy(depthStencilView);
     Memory::Destroy(textureST);
     delete targetQuad;
@@ -170,8 +151,6 @@ void DX::RenderTarget::SetObjectName(const char name[256])
     SetDebugObjectName(backbufferTexture.Get(), n);
     sprintf_s(n, "%s_DepthStencilBuffer", name);
     SetDebugObjectName(depthStencilBuffer.Get(), n);
-    sprintf_s(n, "%s_DepthStencilState", name);
-    SetDebugObjectName(depthStencilState.Get(), n);
     sprintf_s(n, "%s_DepthStencilView", name);
     SetDebugObjectName(depthStencilView.Get(), n);
     sprintf_s(n, "%s_Texture", name);
@@ -211,18 +190,16 @@ void DX::RenderTarget::SetRenderTarget(ID3D11Device* dev, ID3D11DeviceContext* d
     backbufferSRV.Reset();
     textureST.Reset();
     depthStencilBuffer.Reset();
-    depthStencilState.Reset();
     depthStencilView.Reset();
 
     CreateTexture(dev, width, height, textureFormat);
     CreateDepthStencilBuffer(dev, width, height);
 
-    devcon->OMSetDepthStencilState(this->depthStencilState.Get(), 0);
-        devcon->OMSetRenderTargets( // Set Render Target
+    devcon->OMSetRenderTargets( // Set Render Target
             1,
             backbuffer.GetAddressOf(),
             depthStencilView.Get());
-        devcon->RSSetState(rasterizerState.Get());
+    devcon->RSSetState(rasterizerState.Get());
     
 }
 
@@ -244,7 +221,6 @@ void DX::RenderTarget::UnBoundTarget(ID3D11DeviceContext* devcon)
 
 void DX::RenderTarget::Draw(ID3D11DeviceContext* devcon)
 {
-    targetQuad->prepareDraw(devcon);
     devcon->PSSetShaderResources(0, 1, backbufferSRV.GetAddressOf());
     devcon->PSSetSamplers(0, 1, textureST.GetAddressOf());
     renderData->Bind(devcon, 0, ConstantBuffer_BindType::PixelShader);

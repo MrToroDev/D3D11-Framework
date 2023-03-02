@@ -7,6 +7,10 @@
 
 namespace DX 
 {
+	// Defined in Vertex.h
+	enum class DepthStencilMode;
+	enum class PrimitiveMode;
+
 	template<typename T>
 	using ComPtr = Microsoft::WRL::ComPtr<T>;
 
@@ -22,6 +26,7 @@ namespace DX
 		ComPtr<ID3D11DepthStencilView> depthStencilView = nullptr;
 		ComPtr<ID3D11DepthStencilState> depthStencilState = nullptr;
 		ComPtr<ID3D11Texture2D> depthStencilBuffer = nullptr;
+		D3D11_DEPTH_STENCIL_DESC depthStencilDesc;
 		ComPtr<ID3D11RasterizerState> rasterizerState = nullptr;
 		ComPtr<ID3D11Query> startQuery = nullptr;
 		ComPtr<ID3D11Query> endQuery = nullptr;
@@ -55,6 +60,9 @@ namespace DX
 		void Present(int vsync);
 		void SetViewport(int width, int height, int x, int y);
 		void ClearStateFlush();
+
+		void SetDepthStencilMode(DepthStencilMode mode);
+		void SetPrimitiveMode(PrimitiveMode mode);
 
 		bool isFullscreen() const;
 		void SetFullScreen(bool fullscreen);

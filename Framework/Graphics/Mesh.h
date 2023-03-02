@@ -40,7 +40,6 @@ namespace DX
 
 		~Mesh();
 
-		void prepareDraw(ID3D11DeviceContext* devcon);
-		void Draw(ID3D11DeviceContext* devcon, int vertCount);
+		void Draw(ID3D11DeviceContext* devcon, int vertCount, PrimitiveMode mode = PrimitiveMode::Triangle);
 	};
 }

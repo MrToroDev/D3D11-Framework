@@ -23,14 +23,16 @@ void EditorState::init()
 		DX::to_wstring(_data->assetManager.GetFont("consola")).c_str());
 
 	std::vector<DX::VertexTexture> plane_v = {
-		DX::VertexTexture(-0.5f, -0.5f, 0.5f, 0, 0, 0.0f, 1.0f, 0.0f),
-		DX::VertexTexture( 0.5f, -0.5f, 0.5f, 0, 0, 0.0f, 1.0f, 0.0f),
-		DX::VertexTexture(-0.5f, -0.5f, -0.5f, 0, 0, 0.0f, 1.0f, 0.0f),
-		DX::VertexTexture( 0.5f, -0.5f, -0.5f, 0, 0, 0.0f, 1.0f, 0.0f),
+		DX::VertexTexture(-0.5f, -0.5f, 0, 0, 0, 0.0f, 0.0f, 0.0f),
+		DX::VertexTexture( 0.5f, -0.5f, 0, 0, 0, 0.0f, 1.0f, 0.0f),
+		DX::VertexTexture(-0.5f,  0.5f, 0, 0, 0, 0.0f, 0.0f, 1.0f),
+		DX::VertexTexture( 0.5f,  0.5f, 0, 0, 0, 0.0f, 1.0f, 1.0f),
 	};
 
 	std::vector<int> plane_i = {
-		0, 1, 2, 3
+		
+		2, 3, 1,
+		0, 1, 2
 	};
 
 	sampler = new DX::SamplerState(_data->D3Dgraphic->getDevice(), D3D11_TEXTURE_ADDRESS_BORDER, D3D11_TEXTURE_ADDRESS_BORDER, D3D11_TEXTURE_ADDRESS_BORDER, D3D11_FILTER_MIN_MAG_MIP_LINEAR);
@@ -40,13 +42,14 @@ void EditorState::init()
 	cbuffer_Cube2 = new DX::ConstantBuffer<MVPData>(_data->D3Dgraphic->getDevice().Get());
 	cbuffer_Cube2->SetObjectName("cbuffer_Cube2");
 	auto test = DX::LoadMeshFile("Assets/Models/Cube.mesh");
+	
 	mesh_test = new DX::Mesh(_data->D3Dgraphic->getDevice().Get() , DX::to_wstring(_data->assetManager.GetShader("cube")), "PSMain", "VSMain", test.vertices, test.indices);
 	mesh_test->SetObjectName("mesh_object");
-	plane = new DX::Mesh(_data->D3Dgraphic->getDevice().Get(), DX::to_wstring(_data->assetManager.GetShader("cube")), "PSMain", "VSMain", plane_v, plane_i);
-	plane->SetObjectName("plane");
+
 	billboard = new DX::Mesh(_data->D3Dgraphic->getDevice().Get(), DX::to_wstring(_data->assetManager.GetShader("billboard")), "PS", "VS", plane_v, plane_i);
 	billboard->SetObjectName("billboard");
 	billboard_texture = new DX::Texture(_data->assetManager.GetTexture("dximage").c_str(), _data->D3Dgraphic->getDevice().Get());
+	isTriangleList = true;
 }
 
 void EditorState::update(float dt)
@@ -66,15 +69,12 @@ void EditorState::update(float dt)
 			camera.AdjustPosition(camera.GetRightVector() * dt * speed);
 		}
 
-		if (_data->window->IsKeyPressed(DIK_LEFT)) {
-			camera.AdjustRotation(0, -1 * dt * 0.3f, 0);
+		if (_data->window->IsKeyPressed(DIK_K)) {
+			camera.AdjustRotation(0, -1 * dt * 0.2f, 0);
 		}
-		if (_data->window->IsKeyPressed(DIK_RIGHT)) {
-			camera.AdjustRotation(0, 1 * dt * 0.3f, 0);
+		if (_data->window->IsKeyPressed(DIK_L)) {
+			camera.AdjustRotation(0, 1 * dt * 0.2f, 0);
 		}
-	}
-	if (_data->window->IsKeyPressed(DIK_RIGHT)) {
-		camera.AdjustRotation(0, 1 * dt * 0.3, 0);
 	}
 
 	_renderTarget->SetConstantBufferData(_data->D3Dgraphic->getDeviceContext().Get(), false, 1.0f, 2.1f, false, 128, dt);
@@ -100,9 +100,13 @@ void EditorState::update(float dt)
 	
 	DirectX::XMStoreFloat4x4(&cbuffer_Cube2->data.projection, DirectX::XMMatrixTranspose(_p));
 	DirectX::XMStoreFloat4x4(&cbuffer_Cube2->data.view, DirectX::XMMatrixTranspose(camera.GetViewMatrix()));
-	auto e = DirectX::XMFLOAT3(0.0f, 0.0f, 1.0f);
+	auto up = DirectX::XMFLOAT3(0.0f, 1.0f, 0.0f);
+	auto forward = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
+
+	DirectX::XMStoreFloat3(&forward, camera.GetForwardVector());
 	DirectX::XMStoreFloat4x4(&cbuffer_Cube2->data.worldPos, DirectX::XMMatrixTranspose(
-		DX::Math::Billboard(camera.GetPositionFloat3(), DirectX::XMFLOAT3(0, 1, 0), &e, DirectX::XMFLOAT3(0.0f, 0.0f, -3.0f))
+		DX::Math::Billboard(camera.GetPositionFloat3(), up, &forward, DirectX::XMFLOAT3(3, 0, 3))
+		//DirectX::XMMatrixTranslation(0, 0, 4.0f)
 	));
 	cbuffer_Cube2->ApplyChanges(_data->D3Dgraphic->getDeviceContext().Get());
 }
@@ -110,16 +114,25 @@ void EditorState::update(float dt)
 void EditorState::draw()
 {
 	_data->D3Dgraphic->UnBoundRenderTarget();
-	float color[4] = { 0, 1, 1, 1 };
+	float color[4] = { 0, 0, 0, 1 };
 
 	_renderTarget->SetRenderTarget(_data->D3Dgraphic->getDevice().Get(), _data->D3Dgraphic->getDeviceContext().Get(), _data->window->GetWidth(), _data->window->GetHeight());
 	_renderTarget->Clear(_data->D3Dgraphic->getDeviceContext().Get(), color);
+	
+	if (isLineList) _data->D3Dgraphic->SetPrimitiveMode(DX::PrimitiveMode::Line);
+	else if (isTriangleList) _data->D3Dgraphic->SetPrimitiveMode(DX::PrimitiveMode::Triangle);
+	else if (isPointList) _data->D3Dgraphic->SetPrimitiveMode(DX::PrimitiveMode::Point);
+	else _data->D3Dgraphic->SetPrimitiveMode(DX::PrimitiveMode::Undefined);
 
-	mesh_test->prepareDraw(_data->D3Dgraphic->getDeviceContext().Get());
-	sampler->Bind(_data->D3Dgraphic->getDeviceContext(), 0);
+	/*sampler->Bind(_data->D3Dgraphic->getDeviceContext(), 0);
 	billboard_texture->Bind(_data->D3Dgraphic->getDeviceContext().Get(), 0);
 	cbuffer_Cube->Bind(_data->D3Dgraphic->getDeviceContext().Get(), 0, DX::ConstantBuffer_BindType::VertexShader);
-	mesh_test->Draw(_data->D3Dgraphic->getDeviceContext().Get(), 36);
+	mesh_test->Draw(_data->D3Dgraphic->getDeviceContext().Get(), 36, DX::PrimitiveMode::Undefined);*/
+	
+	sampler->Bind(_data->D3Dgraphic->getDeviceContext(), 0);
+	billboard_texture->Bind(_data->D3Dgraphic->getDeviceContext().Get(), 0);
+	cbuffer_Cube2->Bind(_data->D3Dgraphic->getDeviceContext().Get(), 0, DX::ConstantBuffer_BindType::VertexShader);
+	billboard->Draw(_data->D3Dgraphic->getDeviceContext().Get(), 6, DX::PrimitiveMode::Undefined);
 
 	spriteBatch->Begin();
 	std::stringstream ss;
@@ -157,16 +170,34 @@ void EditorState::draw()
 		ImGui::End();
 
 		ImGui::Begin("Editor");
-		ImGui::SliderFloat("Cube_Rot.X", &_cubeT.Rotation.x, 0, 360);
-		ImGui::SliderFloat("Cube_Rot.Y", &_cubeT.Rotation.y, 0, 360);
-		ImGui::SliderFloat("Cube_Rot.Z", &_cubeT.Rotation.z, 0, 360);
-		ImGui::SliderFloat("Cube_Pos.X", &_cubeT.Position.x, -400, 400);
-		ImGui::SliderFloat("Cube_Pos.Y", &_cubeT.Position.y, -400, 400);
-		ImGui::SliderFloat("Cube_Pos.Z", &_cubeT.Position.z, -400, 400);
-		ImGui::SliderFloat("Cube_Scale.X", &_cubeT.Scale.x, 0.1f, 4.0f);
-		ImGui::SliderFloat("Cube_Scale.Y", &_cubeT.Scale.y, 0.1f, 4.0f);
-		ImGui::SliderFloat("Cube_Scale.Z", &_cubeT.Scale.z, 0.1f, 4.0f);
-		ImGui::SliderFloat("Timestep", &_data->TimeStep, 0.001f, 2.0f);
+		ImGui::BeginTabBar("#Tabbar1");
+		if (ImGui::BeginTabItem("Scene")) {
+			ImGui::SliderFloat("Cube_Rot.X", &_cubeT.Rotation.x, 0, 360);
+			ImGui::SliderFloat("Cube_Rot.Y", &_cubeT.Rotation.y, 0, 360);
+			ImGui::SliderFloat("Cube_Rot.Z", &_cubeT.Rotation.z, 0, 360);
+			ImGui::SliderFloat("Cube_Pos.X", &_cubeT.Position.x, -400, 400);
+			ImGui::SliderFloat("Cube_Pos.Y", &_cubeT.Position.y, -400, 400);
+			ImGui::SliderFloat("Cube_Pos.Z", &_cubeT.Position.z, -400, 400);
+			ImGui::SliderFloat("Cube_Scale.X", &_cubeT.Scale.x, 0.1f, 4.0f);
+			ImGui::SliderFloat("Cube_Scale.Y", &_cubeT.Scale.y, 0.1f, 4.0f);
+			ImGui::SliderFloat("Cube_Scale.Z", &_cubeT.Scale.z, 0.1f, 4.0f);
+			ImGui::SliderFloat("Timestep", &_data->TimeStep, 0.001f, 2.0f);
+		
+			ImGui::EndTabItem();
+		}
+		if (ImGui::BeginTabItem("Rendering")) {
+			ImGui::Text("D3D11 Primitive Topology");
+			ImGui::Checkbox("Triangle List", &isTriangleList);
+			ImGui::Checkbox("Line List", &isLineList);
+			ImGui::Checkbox("Point List", &isPointList);
+
+			if (isTriangleList) { isLineList = false; isPointList = false; }
+			if (isLineList) { isTriangleList = false; isPointList = false; }
+			if (isPointList) { isTriangleList = false; isLineList = false; }
+
+			ImGui::EndTabItem();
+		}
+		ImGui::EndTabBar();
 		ImGui::End();
 
 		ImGui::Begin("Stats");
@@ -208,7 +239,6 @@ void EditorState::draw()
 void EditorState::destroy()
 {
 	delete mesh_test;
-	delete plane;
 	delete billboard;
 	delete spriteBatch;
 	delete spriteFont;

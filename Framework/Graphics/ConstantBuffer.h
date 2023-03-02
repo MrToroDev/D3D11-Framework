@@ -7,7 +7,8 @@ namespace DX {
 	enum class ConstantBuffer_BindType
 	{
 		VertexShader,
-		PixelShader
+		PixelShader,
+		ComputeShader
 	};
 
 	template<class T>

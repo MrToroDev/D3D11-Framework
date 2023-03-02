@@ -23,9 +23,15 @@ namespace DX
 			return (random * range) + min;
 		}
 	};
-
+	
 	namespace hlsl
 	{
+		template<const int SIZE, typename TYPE = float>
+		using vector = TYPE[SIZE];
+
+		using matrix = float[4][4];
+		
+
 		struct float2 { float2(float _x, float _y) : x(_x), y(_y) {} float x, y; };
 		struct float3 { float3(float _x, float _y, float _z) : x(_x), y(_y), z(_z) {} float x, y, z; };
 		struct float4 { float x, y, z, w; };

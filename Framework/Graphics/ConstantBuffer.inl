@@ -65,7 +65,10 @@ void DX::ConstantBuffer<T>::Bind(ID3D11DeviceContext* devcon, int count, Constan
 	if (type == ConstantBuffer_BindType::VertexShader) {
 		devcon->VSSetConstantBuffers(count, 1, buffer.GetAddressOf());
 	}
-	if (type == ConstantBuffer_BindType::PixelShader) {
+	else if (type == ConstantBuffer_BindType::PixelShader) {
 		devcon->PSSetConstantBuffers(count, 1, buffer.GetAddressOf());
+	}
+	else if (type == ConstantBuffer_BindType::ComputeShader) {
+		devcon->CSSetConstantBuffers(count, 1, buffer.GetAddressOf());
 	}
 }

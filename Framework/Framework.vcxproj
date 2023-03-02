@@ -201,6 +201,7 @@
     <ClInclude Include="Physics\RigidDynamic.h" />
     <ClInclude Include="Physics\RigidStatic.h" />
     <ClInclude Include="System\AssetManager.h" />
+    <ClInclude Include="System\ComputeShader.h" />
     <ClInclude Include="System\Config.h" />
     <ClInclude Include="System\ConfigFile.h" />
     <ClInclude Include="System\Math.h" />

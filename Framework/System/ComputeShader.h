@@ -16,12 +16,12 @@ namespace DX
 	class ComputeShader
 	{
 	public:
-		ComputeShader(ID3D11Device* dev, ID3D11DeviceContext* devcon, std::wstring file, std::string entryPoint, ComputeBuffer* outputBufferData);
+		ComputeShader(DX::ComPtr <ID3D11Device> dev, DX::ComPtr <ID3D11DeviceContext> devcon, std::wstring file, std::string entryPoint, ComputeBuffer* outputBufferData);
 		~ComputeShader();
 
 		void AddBuffer(ComputeBuffer* buf);
 
-		void RunProgram();
+		void RunProgram(UINT Tx, UINT Ty, UINT Tz);
 
 		// Need to be reinterpret cast
 		void* GetDataGPU();
@@ -30,14 +30,9 @@ namespace DX
 		DX::ComPtr<ID3D11ComputeShader> _cShader;
 		DX::ComPtr <ID3D11Buffer> _outputBuffer = nullptr;
 		DX::ComPtr < ID3D11UnorderedAccessView> _outputBufUAV = nullptr;
-		ID3D11Device* devRef;
-		ID3D11DeviceContext* devconRef;
+		DX::ComPtr<ID3D11Device> devRef;
+		DX::ComPtr<ID3D11DeviceContext> devconRef;
 
-		struct _Buf
-		{
-			DX::ComPtr <ID3D11Buffer> pBuf;
-			DX::ComPtr <ID3D11ShaderResourceView> pBufSRV;
-		};
-		std::vector<_Buf> _buffers;
+		std::vector<DX::ComPtr<ID3D11ShaderResourceView>> _buffersSRV;
 	};
 }

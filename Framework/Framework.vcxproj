@@ -171,6 +171,7 @@
     <ClCompile Include="Physics\RigidDynamic.cpp" />
     <ClCompile Include="Physics\RigidStatic.cpp" />
     <ClCompile Include="System\AssetManager.cpp" />
+    <ClCompile Include="System\ComputeShader.cpp" />
     <ClCompile Include="System\ConfigFile.cpp" />
     <ClCompile Include="System\Math.cpp" />
     <ClCompile Include="System\Timer.cpp" />

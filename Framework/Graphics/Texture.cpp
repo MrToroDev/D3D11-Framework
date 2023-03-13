@@ -109,7 +109,7 @@ void DX::Texture::initSRV(ID3D11Device* dev, ID3D11DeviceContext* devcon, std::v
 	}
 
 	ID3D11Texture2D* texture = nullptr;
-
+	
 	D3D11_TEXTURE2D_DESC textureDesc = {};
 	textureDesc.Width = fileData[0].width;
 	textureDesc.Height = fileData[0].height;

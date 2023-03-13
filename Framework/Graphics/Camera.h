@@ -8,7 +8,7 @@ namespace DX
 	{
 	public:
 		Camera();
-		
+
 		const DirectX::XMMATRIX& GetViewMatrix() const;
 
 		const DirectX::XMVECTOR& GetPositionVector() const;
@@ -24,12 +24,11 @@ namespace DX
 		void SetRotation(float x, float y, float z);
 		void AdjustRotation(const DirectX::XMVECTOR& rot);
 		void AdjustRotation(float x, float y, float z);
-
+		void SetLookAtPos(DirectX::XMFLOAT3 lookAtPos);
 		const DirectX::XMVECTOR& GetForwardVector();
+		const DirectX::XMVECTOR& GetRightVector();
 		const DirectX::XMVECTOR& GetBackwardVector();
 		const DirectX::XMVECTOR& GetLeftVector();
-		const DirectX::XMVECTOR& GetRightVector();
-		
 	private:
 		void UpdateViewMatrix();
 		DirectX::XMVECTOR posVector;
@@ -45,8 +44,8 @@ namespace DX
 		const DirectX::XMVECTOR DEFAULT_RIGHT_VECTOR = DirectX::XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
 
 		DirectX::XMVECTOR vec_forward;
+		DirectX::XMVECTOR vec_left;
 		DirectX::XMVECTOR vec_right;
 		DirectX::XMVECTOR vec_backward;
-		DirectX::XMVECTOR vec_left;
 	};
 }

@@ -25,6 +25,7 @@ VSOutput VSMain(VSInput input)
 {
     VSOutput output = (VSOutput)0;
     output.pos = mul(float4(input.position, 1.0), worldPos);
+    //output.pos = mul(float4(input.position, 1.0), view);
     output.pos = mul(output.pos, view);
     output.pos = mul(output.pos, projection);
     output.pos.z = output.pos.w;

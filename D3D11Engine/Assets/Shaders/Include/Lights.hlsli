@@ -10,7 +10,7 @@ namespace Lights
         float shininess;
     };
 
-    float3 PointLight_raw(Light inlight, float3 lightColor)
+    float3 PointLight_raw(in Light light, in float3 lightColor)
     {
         const float constant = 1.0;
         const float Linear = 0.09;

@@ -1,6 +1,6 @@
 namespace ScreenEffects
 {
-    float2 PixelateFrame(float2 UV, float noise)
+    float2 PixelateFrame(in float2 UV, in float noise)
     {
         float2 p = UV;
         p.x -= fmod(p.x, 1.0 / noise);
@@ -9,7 +9,7 @@ namespace ScreenEffects
         return p;
     }
 
-    float3 StaticTVNoise(float2 texcoords, float _clock)
+    float3 StaticTVNoise(in float2 texcoords, in float _clock)
     {
 
         float2 uv = texcoords;
@@ -24,7 +24,7 @@ namespace ScreenEffects
         return col;
     }
     
-    float4 TVScreenEffect(float2 texcoords, Texture2D t, SamplerState sample)
+    float4 TVScreenEffect(in float2 texcoords, in Texture2D t, in SamplerState sample)
     {
         float2 uv = texcoords.xy;
         uv = uv * 2.0 - 1.0;
@@ -42,7 +42,7 @@ namespace ScreenEffects
         }
     }
     
-    float4 BlurEffect(Texture2D t, SamplerState st, float2 uv, float noise)
+    float4 BlurEffect(in Texture2D t, in SamplerState st, in float2 uv, in float noise)
     {
         float offset = 1.0 / noise;
         float2 offsets[9] =

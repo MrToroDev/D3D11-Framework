@@ -7,7 +7,7 @@
 	  "renderTarget": "Assets/Shaders/RenderTarget.hlsl"
   },
   "textures": {
-	  "dximage": "Assets/Gfx/dxImage.jpg"
+    "dximage": "Assets/Gfx/dxImage.jpg"
   },
   "fonts": {
 	  "consola": "Assets/Fonts/consola_font.sprite"

@@ -97,24 +97,52 @@ void Camera::AdjustRotation(float x, float y, float z)
 	this->UpdateViewMatrix();
 }
 
-const DirectX::XMVECTOR& DX::Camera::GetForwardVector()
+void Camera::SetLookAtPos(XMFLOAT3 lookAtPos)
+{
+	//Verify that look at pos is not the same as cam pos. They cannot be the same as that wouldn't make sense and would result in undefined behavior.
+	if (lookAtPos.x == this->pos.x && lookAtPos.y == this->pos.y && lookAtPos.z == this->pos.z)
+		return;
+
+	lookAtPos.x = this->pos.x - lookAtPos.x;
+	lookAtPos.y = this->pos.y - lookAtPos.y;
+	lookAtPos.z = this->pos.z - lookAtPos.z;
+
+	float pitch = 0.0f;
+	if (lookAtPos.y != 0.0f)
+	{
+		const float distance = sqrt(lookAtPos.x * lookAtPos.x + lookAtPos.z * lookAtPos.z);
+		pitch = atan(lookAtPos.y / distance);
+	}
+
+	float yaw = 0.0f;
+	if (lookAtPos.x != 0.0f)
+	{
+		yaw = atan(lookAtPos.x / lookAtPos.z);
+	}
+	if (lookAtPos.z > 0)
+		yaw += XM_PI;
+
+	this->SetRotation(pitch, yaw, 0.0f);
+}
+
+const XMVECTOR& Camera::GetForwardVector()
 {
 	return this->vec_forward;
 }
 
-const DirectX::XMVECTOR& DX::Camera::GetBackwardVector()
+const XMVECTOR& Camera::GetRightVector()
+{
+	return this->vec_right;
+}
+
+const XMVECTOR& Camera::GetBackwardVector()
 {
 	return this->vec_backward;
 }
 
-const DirectX::XMVECTOR& DX::Camera::GetLeftVector()
+const XMVECTOR& Camera::GetLeftVector()
 {
 	return this->vec_left;
-}
-
-const DirectX::XMVECTOR& DX::Camera::GetRightVector()
-{
-	return this->vec_right;
 }
 
 void Camera::UpdateViewMatrix() //Updates view matrix and also updates the movement vectors
@@ -130,9 +158,9 @@ void Camera::UpdateViewMatrix() //Updates view matrix and also updates the movem
 	//Rebuild view matrix
 	this->viewMatrix = XMMatrixLookAtLH(this->posVector, camTarget, upDir);
 
-	XMMATRIX vecRotation = XMMatrixRotationRollPitchYaw(0.0f, this->rot.y, 0.0f);
-	this->vec_forward = XMVector3TransformCoord(this->DEFAULT_FORWARD_VECTOR, vecRotation);
-	this->vec_backward = XMVector3TransformCoord(this->DEFAULT_BACKWARD_VECTOR, vecRotation);
-	this->vec_left = XMVector3TransformCoord(this->DEFAULT_LEFT_VECTOR, vecRotation);
-	this->vec_right = XMVector3TransformCoord(this->DEFAULT_RIGHT_VECTOR, vecRotation);
+	XMMATRIX vecRotationMatrix = XMMatrixRotationRollPitchYaw(0.0f, this->rot.y, 0.0f);
+	this->vec_forward = XMVector3TransformCoord(this->DEFAULT_FORWARD_VECTOR, vecRotationMatrix);
+	this->vec_backward = XMVector3TransformCoord(this->DEFAULT_BACKWARD_VECTOR, vecRotationMatrix);
+	this->vec_left = XMVector3TransformCoord(this->DEFAULT_LEFT_VECTOR, vecRotationMatrix);
+	this->vec_right = XMVector3TransformCoord(this->DEFAULT_RIGHT_VECTOR, vecRotationMatrix);
 }

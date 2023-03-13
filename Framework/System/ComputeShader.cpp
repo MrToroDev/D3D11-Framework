@@ -99,16 +99,11 @@ void DX::ComputeShader::AddBuffer(ComputeBuffer* buf)
 void DX::ComputeShader::RunProgram(UINT Tx, UINT Ty, UINT Tz)
 {
 	devconRef->CSSetShader(this->_cShader.Get(), nullptr, 0);
-	//if (!_buffersSRV.empty()) {
-		//ID3D11ShaderResourceView* srv[16];
-		//std::copy(_buffersSRV.begin(), _buffersSRV.end(), srv);
+	/*for (int i = 0; i < _buffersSRV.size(); i++) {
+		devconRef->CSSetShaderResources(i, 1, _buffersSRV[i].GetAddressOf());
+	}*/
 
-		for (int i = 0; i < _buffersSRV.size(); i++) {
-			devconRef->CSSetShaderResources(i, 1, _buffersSRV[i].GetAddressOf());
-		}
-	//}
-
-	//devconRef->CSSetShaderResources(0, _buffersSRV.size(), _buffersSRV);
+	devconRef->CSSetShaderResources(0, _buffersSRV.size(), _buffersSRV.data()->GetAddressOf());
 	devconRef->CSSetUnorderedAccessViews(0, 1, _outputBufUAV.GetAddressOf(), 0);
 	devconRef->Dispatch(Tx, Ty, Tz);
 }

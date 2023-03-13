@@ -38,20 +38,20 @@ VSOutput VSMain(VSInput input)
 
 // Pixel Shader
 
+Texture2D t : register(t0);
+SamplerState st : register(s0);
+
 struct PixelOutput
 {
     float4 PixelColor : SV_Target0;
 };
 
-SamplerState st : register(s0);
-Texture2D tex : register(t0);
-
-PixelOutput PSMain(VSOutput input)
+PixelOutput PSMain(VSOutput input, uint pid : SV_PrimitiveID)
 {
     PixelOutput output;
     
-    //output.PixelColor = float4(1.0, 0.0, 0.0, 1.0);
-    output.PixelColor = tex.Sample(st, input.uv);
+    //output.PixelColor = float4(1, 0.0, 0.0, 1.0);
+    output.PixelColor = t.Sample(st, input.uv);
     
     return output;
 }

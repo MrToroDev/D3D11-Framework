@@ -95,7 +95,7 @@ DX::RenderTarget::RenderTarget(ID3D11Device* dev, ID3D11DeviceContext* devcon, i
 
     D3D11_RASTERIZER_DESC rsDesc = {};
     rsDesc.FillMode = D3D11_FILL_MODE::D3D11_FILL_SOLID;
-    rsDesc.CullMode = D3D11_CULL_MODE::D3D11_CULL_BACK;
+    rsDesc.CullMode = D3D11_CULL_MODE::D3D11_CULL_NONE;
     rsDesc.FrontCounterClockwise = false;
     rsDesc.DepthBias = false;
     rsDesc.DepthBiasClamp = 0;
